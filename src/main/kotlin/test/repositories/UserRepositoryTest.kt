@@ -8,7 +8,7 @@ class UserRepositoryTest {
     val db = DB
     @org.junit.Before
     fun setUp() {
-        db.connect("jdbc:postgresql://127.0.0.1/chire", "postgres", "tcinTE5%k")
+        db.connect("jdbc:postgresql://127.0.0.1/chire", "postgres", System.getenv("PG_PASS"))
     }
 
     @org.junit.After

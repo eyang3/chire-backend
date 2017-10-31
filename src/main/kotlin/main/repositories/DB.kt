@@ -16,7 +16,7 @@ object DB {
     init {
 
     }
-    fun connect(url: String, user: String, password: String) {
+    fun connect(url: String, user: String, password: String?) {
         val con = DriverManager.getConnection(url, user, password)
         this.dataSource = PGPooledConnection(con, true)
     }

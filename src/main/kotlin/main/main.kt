@@ -22,7 +22,8 @@ fun main(args : Array<String>) {
     println(p.javaClass.kotlin.memberProperties)
     staticFiles.location("/public")
     var  m = DB
-    m.connect("jdbc:postgresql://127.0.0.1/chire", "postgres", "tcinTE5%k")
+    println(System.getenv("PG_PASS"))
+    m.connect("jdbc:postgresql://127.0.0.1/chire", "postgres",  System.getenv("PG_PASS"))
 
     //allow routes to match with trailing slash
     before(Filter({ req, res ->
