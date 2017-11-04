@@ -1,8 +1,6 @@
 package main
 
-/**
- * Created by allen on 7/28/16.
- */
+
 
 import com.google.gson.Gson
 import spark.Spark.*
@@ -10,7 +8,8 @@ import spark.Filter
 import main.repositories.DB
 import main.repositories.User
 import main.repositories.UserRepository
-import javax.print.attribute.IntegerSyntax
+import routes.Stuff
+import routes.userRoutes
 import kotlin.reflect.full.memberProperties
 
 
@@ -64,6 +63,12 @@ fun main(args : Array<String>) {
             },
             {gson.toJson(it)}
     )
+    userRoutes()
+   /* get("/user", {req, res ->
+        val stuff = Stuff("Eric", 12)
+        println(stuff)
+        stuff
+    }, {gson.toJson(it)})*/
 
 
 }
