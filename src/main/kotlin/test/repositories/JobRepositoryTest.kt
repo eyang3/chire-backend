@@ -11,13 +11,13 @@ class JobRepositoryTest {
     @org.junit.Before
     fun setUp() {
         db.connect("jdbc:postgresql://127.0.0.1/chire", "postgres", System.getenv("PG_PASS"))
-        db.connection().prepareStatement("truncate table jobs").execute();
+        db.connection().prepareStatement("truncate table jobs cascade").execute();
         db.connection().prepareStatement("truncate table users cascade").execute();
     }
 
     @org.junit.After
     fun tearDown() {
-        db.connection().prepareStatement("truncate table jobs").execute();
+        db.connection().prepareStatement("truncate table jobs cascade").execute();
         db.connection().prepareStatement("truncate table users cascade").execute();
     }
 
