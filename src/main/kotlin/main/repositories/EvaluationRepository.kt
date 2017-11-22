@@ -1,14 +1,6 @@
 package main.repositories;
 
-import java.nio.charset.StandardCharsets
-import java.security.MessageDigest
 import java.sql.ResultSet
-import java.sql.Timestamp
-import java.time.LocalDateTime
-import java.time.ZoneOffset
-import java.time.ZonedDateTime
-import javax.xml.bind.annotation.adapters.HexBinaryAdapter
-
 
 data class Evaluations(var id: Int?, var set: String?, var question: String?,
                        var userref: Int?, var jobref: Int?) {
