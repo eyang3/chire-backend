@@ -10,7 +10,7 @@ import io.jsonwebtoken.SignatureAlgorithm;
 import main.repositories.User
 
 data class loginRequest (@SerializedName("username") val username: String,
-                         @SerializedName("password") val password: String)
+                         @SerializedName("password") val password: String?)
 val gson = Gson()
 
 fun generateJWT(user: User): String {
@@ -34,7 +34,7 @@ fun userRoutes() {
     post("/login", {req, res ->
         try {
             var request: loginRequest = gson.fromJson(req.body(), loginRequest::class.java)
-            var user = userrepo.valid(request.username, request.password)
+            var user = userrepo.valid(request.username, request.password!!)
             if(user != null) {
                 return@post(generateJWT(user));
             } else {
@@ -52,10 +52,16 @@ fun userRoutes() {
             var request: loginRequest = gson.fromJson(req.body(), loginRequest::class.java)
             userrepo.signup(request.username, request.password, 3);
             return@post(RESTStatusMessage("success", "create", "Successfully Created User"));
-
         } catch(e: Exception) {
             return@post(RESTStatusMessage("error", "create", e.message.toString() ));
         }
-
+    }, {gson.toJson(it)})
+    get("/requestReset", {req, res ->
+        try {
+            val m: String = userrepo.requestReset(req.queryParams("email"));
+            return@get(m);
+        } catch(e: Exception) {
+            return@get(RESTStatusMessage("error", "create", e.message.toString() ));
+        }
     }, {gson.toJson(it)})
 }

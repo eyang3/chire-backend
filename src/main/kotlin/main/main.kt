@@ -1,10 +1,6 @@
 package main
 
 
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
-
-import io.jsonwebtoken.impl.crypto.MacProvider;
 import com.google.gson.Gson
 import spark.Spark.*
 import spark.Filter
