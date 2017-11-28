@@ -43,6 +43,11 @@ sourceSets {
             srcDir 'src/main/kotlin/test'
         }
     }
+    utils {
+        java {
+            srcDir 'src/main/kotlin/utils'
+        }
+    }
 }
 
 shadowJar {

@@ -55,13 +55,13 @@ object UserRepository {
         conn.close()
     }
 
-
     fun valid(email: String, password: String): User? {
         val result = getUser(email)
+
         if (result.size == 0) {
             return null
         }
-        if (stringHash(result[0].salt + password) != result[0].password) {
+        if (stringHash(password + result[0].salt) != result[0].password) {
             return null
         }
         return result[0]

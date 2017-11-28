@@ -4,6 +4,7 @@
     <bytecodeTargetLevel>
       <module name="spark-kotlin-example_main" target="1.8" />
       <module name="spark-kotlin-example_test" target="1.8" />
+      <module name="spark-kotlin-example_utils" target="1.8" />
     </bytecodeTargetLevel>
   </component>
 </project>

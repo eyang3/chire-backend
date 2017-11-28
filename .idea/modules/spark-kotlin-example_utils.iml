@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module external.linked.project.id="spark-kotlin-example:utils" external.linked.project.path="$MODULE_DIR$/../.." external.root.project.path="$MODULE_DIR$/../.." external.system.id="GRADLE" external.system.module.group="" external.system.module.type="sourceSet" external.system.module.version="unspecified" type="JAVA_MODULE" version="4">
+  <component name="NewModuleRootManager" LANGUAGE_LEVEL="JDK_1_8">
+    <output url="file://$MODULE_DIR$/../../out/utils/classes" />
+    <exclude-output />
+    <content url="file://$MODULE_DIR$/../../src/main/kotlin/utils">
+      <sourceFolder url="file://$MODULE_DIR$/../../src/main/kotlin/utils" isTestSource="false" />
+    </content>
+    <content url="file://$MODULE_DIR$/../../src/utils">
+      <sourceFolder url="file://$MODULE_DIR$/../../src/utils/java" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/../../src/utils/resources" type="java-resource" />
+    </content>
+    <orderEntry type="inheritedJdk" />
+    <orderEntry type="sourceFolder" forTests="false" />
+    <orderEntry type="library" name="io.jsonwebtoken:jjwt:0.9.0" level="project" />
+    <orderEntry type="library" name="KotlinJavaRuntime" level="project" />
+    <orderEntry type="library" name="Gradle: org.jetbrains.kotlin:kotlin-stdlib:1.1.50" level="project" />
+  </component>
+</module>

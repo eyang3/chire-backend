@@ -162,7 +162,7 @@ object DB {
                         "kotlin.Float?" -> rs.getFloat(fields[i])
                         "kotlin.Long?" -> rs.getLong(fields[i])
                         "kotlin.String?" -> rs.getString(fields[i])
-                        "kotlin.collections.MutableList<kotlin.Int>?" ->
+                        "kotlin.collections.List<kotlin.Int>?" ->
                             (rs.getArray(fields[i]).array as Array<out Any>).toList() as List<T>
                         "java.sql.Timestamp?" -> rs.getTimestamp(fields[i])
                         else -> null

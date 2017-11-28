@@ -1,14 +1,16 @@
 package main
 
 
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.SignatureAlgorithm;
 
+import io.jsonwebtoken.impl.crypto.MacProvider;
 import com.google.gson.Gson
 import spark.Spark.*
 import spark.Filter
 import main.repositories.DB
 import main.repositories.User
 import main.repositories.UserRepository
-import routes.Stuff
 import routes.userRoutes
 import kotlin.reflect.full.memberProperties
 
