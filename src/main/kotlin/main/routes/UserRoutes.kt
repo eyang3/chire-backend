@@ -56,6 +56,7 @@ fun userRoutes() {
             return@post(RESTStatusMessage("error", "create", e.message.toString() ));
         }
     }, {gson.toJson(it)})
+
     get("/requestReset", {req, res ->
         try {
             val m: String = userrepo.requestReset(req.queryParams("email"));
@@ -63,5 +64,13 @@ fun userRoutes() {
         } catch(e: Exception) {
             return@get(RESTStatusMessage("error", "create", e.message.toString() ));
         }
+    }, {gson.toJson(it)})
+
+    post("/reset/:id", {req, res ->
+        var check: String = req.params("id");
+        var email: String = req.queryParams("email");
+        
+        "hello"
+
     }, {gson.toJson(it)})
 }
