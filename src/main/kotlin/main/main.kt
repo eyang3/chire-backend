@@ -7,7 +7,7 @@ import spark.Filter
 import main.repositories.DB
 import main.repositories.User
 import main.repositories.UserRepository
-import routes.userRoutes
+import routes.*
 import kotlin.reflect.full.memberProperties
 
 
@@ -23,12 +23,9 @@ fun main(args : Array<String>) {
     m.connect("jdbc:postgresql://127.0.0.1/chire", "postgres",  System.getenv("PG_PASS"))
 
     //allow routes to match with trailing slash
-    before(Filter({ req, res ->
-        val path = req.pathInfo()
-        if (!path.equals("/") && path.endsWith("/")){
-            res.redirect(path.substring(0, path.length - 1))
-        }
-    }))
+    before("/ar/*", {req, res ->
+        println("Secure Route");
+    })
 
     //set response type to json for api routes
     after(Filter({req, res ->
@@ -47,26 +44,10 @@ fun main(args : Array<String>) {
     //used to parse and convert JSON
     val gson = Gson()
 
-    get(
-            "/",
-            { req, res ->
-                var stmt = m.connection().createStatement()
-                var rs = stmt.executeQuery("select * from users")
-                var result = m.getResults<User>(rs, User::class)
-                var userRepo = UserRepository
-                val valString = userRepo.requestReset("iamspazzy@gmail.com")
-                println(userRepo.isValidationString("iamspazzy@gmail.com" , valString))
-                result
 
-            },
-            {gson.toJson(it)}
-    )
     userRoutes()
-   /* get("/user", {req, res ->
-        val stuff = Stuff("Eric", 12)
-        println(stuff)
-        stuff
-    }, {gson.toJson(it)})*/
+    JobRoutes()
+
 
 
 }

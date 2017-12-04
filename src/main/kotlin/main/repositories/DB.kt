@@ -45,7 +45,7 @@ object DB {
                 it.name
             }
         }.filter { it -> it != null }
-
+        println(fields);
         var sets = fields.map { it -> "$it = ?" }.joinToString(",")
         var query = "SELECT * FROM $table"
         if(fields.size > 0) {
