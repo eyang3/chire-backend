@@ -16,12 +16,11 @@ val gson = Gson()
 
 fun generateJWT(user: User): String {
 
-    var roleClaims = mutableMapOf<String, Boolean>()
-    println(user.roles);
-    user.roles!!.forEach { i ->
-        roleClaims[i.toString()] = true;
-    }
-    println(roleClaims);
+    var roleClaims = mutableMapOf<String, Any>()
+
+    roleClaims["email"] = user.email as Any;
+    roleClaims["roles"] = user.roles as Any;
+    roleClaims["id"] = user.id as Any;
     var token: String = Jwts.builder()
             .setSubject(user.email)
             .setClaims(roleClaims.toMap())
@@ -29,6 +28,21 @@ fun generateJWT(user: User): String {
             .compact()
     return (token)
 }
+
+fun readJWT(token: String?): User? {
+    try {
+        var output = Jwts.parser().setSigningKey("HelloWorld").parse(token);
+        println(output)
+        var claims = output.body as Map<String, Any>;
+        return (User(claims["id"] as Int, claims["email"] as String, null, null, claims["roles"] as List<Int>, null));
+    } catch(e: Exception) {
+        println("Unable to validate auth token")
+        return(null)
+    }
+
+
+}
+
 
 fun userRoutes() {
     val userrepo = UserRepository

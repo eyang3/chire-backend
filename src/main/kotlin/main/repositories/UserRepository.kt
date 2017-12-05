@@ -10,10 +10,10 @@ import java.util.*
 import javax.xml.bind.annotation.adapters.HexBinaryAdapter
 
 
-data class User(var email: String?, var password: String?,
+data class User(var id: Int?, var email: String?, var password: String?,
                 var salt: String?, var roles: List<Int>?,
                 var reset: Timestamp?) {
-    constructor() : this(null, null, null, null, null)
+    constructor() : this(null, null, null, null, null, null)
 }
 
 fun stringHash(message: String): String {
@@ -29,7 +29,7 @@ object UserRepository {
     }
 
     fun signup(email: String, password: String?, role: Int) {
-        var u = User(email, password, null, listOf<Int>(1), null)
+        var u = User(null, email, password, null, listOf<Int>(1), null)
         val conn = DB.connection()
         var statement = conn.prepareStatement("SELECT * FROM USERS where email = ?")
         statement.setString(1, email)
