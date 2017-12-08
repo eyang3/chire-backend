@@ -6,7 +6,6 @@ import java.sql.Timestamp
 import java.time.LocalDateTime
 import java.time.ZoneOffset
 import java.time.ZonedDateTime
-import java.util.*
 import javax.xml.bind.annotation.adapters.HexBinaryAdapter
 
 
@@ -58,7 +57,6 @@ object UserRepository {
 
     fun valid(email: String, password: String): User? {
         val result = getUser(email)
-
         if (result.size == 0) {
             return null
         }
@@ -146,7 +144,7 @@ object UserRepository {
         var email = user.email
         var reset = user.reset
         var date = reset?.toLocalDateTime()?.toLocalDate();
-        if(LocalDateTime.now().minusHours(1).toLocalDate() > date) {
+        if (LocalDateTime.now().minusHours(1).toLocalDate() > date) {
             return false;
         }
         return stringHash(email + reset) == validationString

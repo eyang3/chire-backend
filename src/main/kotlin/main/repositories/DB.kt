@@ -7,7 +7,6 @@ import kotlin.reflect.KMutableProperty
 import kotlin.reflect.full.createInstance
 import kotlin.reflect.full.memberProperties
 
-
 object DB {
     lateinit private var dataSource: PGPooledConnection
 
@@ -22,6 +21,9 @@ object DB {
 
     fun connection(): Connection {
         return this.dataSource.connection
+    }
+    fun <T: Any> sqlRead(sql: String, entityClass: Array<KClass<T>>) {
+
     }
 
     fun <T : Any> crudRead(table: String, entityClass: KClass<T>, obj: T,

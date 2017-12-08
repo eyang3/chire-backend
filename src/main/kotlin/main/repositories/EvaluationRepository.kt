@@ -10,7 +10,6 @@ data class Evaluations(var id: Int?, var set: String?, var question: String?,
 
 object EvaluationRepository {
     init {
-
     }
     fun create(set: String, question: String, userRef: Int, jobRef: Int) {
         var evaluation = Evaluations(null, set, question, userRef, jobRef);
@@ -29,7 +28,6 @@ object EvaluationRepository {
     }
     fun readDistinct(pattern: Evaluations): ResultSet {
         return DB.crudRead("evaluations", Evaluations::class, pattern, subset="set, question")
-
     }
 
 }

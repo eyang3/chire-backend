@@ -1,13 +1,13 @@
 package routes
 
-import spark.Spark.*
 import com.google.gson.Gson
 import com.google.gson.annotations.SerializedName
-import io.jsonwebtoken.Claims
-import main.repositories.UserRepository
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.Jwts
+import io.jsonwebtoken.SignatureAlgorithm
 import main.repositories.User
+import main.repositories.UserRepository
+import spark.Spark.get
+import spark.Spark.post
 
 data class loginRequest(@SerializedName("username") val username: String,
                         @SerializedName("password") val password: String?)
@@ -31,16 +31,14 @@ fun generateJWT(user: User): String {
 
 fun readJWT(token: String?): User? {
     try {
-        var output = Jwts.parser().setSigningKey("HelloWorld").parse(token);
-        println(output)
+
+        var output = Jwts.parser().setSigningKey("HelloWorld").parse(token)
         var claims = output.body as Map<String, Any>;
         return (User(claims["id"] as Int, claims["email"] as String, null, null, claims["roles"] as List<Int>, null));
-    } catch(e: Exception) {
+    } catch (e: Exception) {
         println("Unable to validate auth token")
-        return(null)
+        return (null)
     }
-
-
 }
 
 
@@ -61,12 +59,13 @@ fun userRoutes() {
             return@post (RESTStatusMessage("error", "login", "No Username or Password"));
         }
     }, { gson.toJson(it) })
-
+            .
     post("/create", { req, res ->
         try {
             var request: loginRequest = gson.fromJson(req.body(), loginRequest::class.java)
             userrepo.signup(request.username, request.password, 3);
-            return@post (RESTStatusMessage("success", "create", "Successfully Created User"));
+            var user = userrepo.valid(request.username, request.password!!)
+            return@post (RESTStatusMessage("success", "create", generateJWT(user!!)));
         } catch (e: Exception) {
             return@post (RESTStatusMessage("error", "create", e.message.toString()));
         }
@@ -99,8 +98,7 @@ fun userRoutes() {
         try {
             userrepo.resetPassword(email, check, request.password!!)
             return@post (RESTStatusMessage("ok", "reset", "Valid Reset String"))
-        }
-        catch(e: Exception) {
+        } catch (e: Exception) {
             return@post (RESTStatusMessage("error", "reset", "Unable to reset password"))
         }
 
