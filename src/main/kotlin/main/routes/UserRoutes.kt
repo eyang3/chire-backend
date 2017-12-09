@@ -59,7 +59,7 @@ fun userRoutes() {
             return@post (RESTStatusMessage("error", "login", "No Username or Password"));
         }
     }, { gson.toJson(it) })
-            .
+
     post("/create", { req, res ->
         try {
             var request: loginRequest = gson.fromJson(req.body(), loginRequest::class.java)
