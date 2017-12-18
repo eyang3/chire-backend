@@ -11,9 +11,9 @@ object JobRepository {
     init {
 
     }
-    fun create(title: String, salary: String, userRef: Int, body: String) {
+    fun create(title: String, salary: String, userRef: Int, body: String): Int {
         var job = Jobs(null, title, salary, userRef, body);
-        DB.crudSave("jobs", Jobs::class, job, null)
+        return(DB.crudSave("jobs", Jobs::class, job, null));
     }
     fun read(pattern: Jobs): ResultSet {
         return DB.crudRead("jobs", Jobs::class, pattern)

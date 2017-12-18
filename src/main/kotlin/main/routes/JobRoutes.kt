@@ -4,7 +4,7 @@ import spark.Spark.*
 import main.repositories.DB
 import main.repositories.JobRepository
 import main.repositories.Jobs
-
+import main.repositories.User
 
 
 fun JobRoutes() {
@@ -18,7 +18,6 @@ fun JobRoutes() {
 
     get("/ar/job/:id", {req, res ->
         var id: String = req.params("id");
-        println(id);
         var pattern = Jobs(id.toInt(), null, null, null, null);
         var resultSet = JobRepository.read(pattern)
         val results = DB.getResults(resultSet, Jobs::class)
@@ -29,14 +28,14 @@ fun JobRoutes() {
         }
     }, {gson.toJson(it)})
 
-    post("job/:id", {req, res ->
+    put("/ar/job/:id", {req, res ->
         var check: String = req.params("id");
         var request: Jobs = gson.fromJson(req.body(), Jobs::class.java)
         try {
             var resultSet = JobRepository.update(check.toInt(), request.title, request.salary, request.userref, request.body)
-            return@post(RESTStatusMessage("success", "jobs", ""))
+            return@put(RESTStatusMessage("success", "jobs", "{\"id\": $check}"))
         }catch(e: Exception) {
-            return@post(RESTStatusMessage("error", "jobs", "Unable to update job"))
+            return@put(RESTStatusMessage("error", "jobs", "Unable to update job"))
         }
 
     }, {gson.toJson(it)});
@@ -49,13 +48,17 @@ fun JobRoutes() {
     })
 
     put("/ar/job", {req, res->
+        val jwt = req.cookie("auth")
+        var user: User = readJWT(jwt)!!;
         var request: Jobs = gson.fromJson(req.body(), Jobs::class.java)
         try {
             var request: Jobs = gson.fromJson(req.body(), Jobs::class.java)
-            var resultSet = JobRepository.create(request.title!!, request.salary!!, request.userref!!, request.body!!)
-            return@put(RESTStatusMessage("success", "jobs", ""))
+            var resultSet = JobRepository.create(request.title!!, request.salary!!, user.id!!, request.body!!)
+            println(resultSet);
+            return@put(RESTStatusMessage("success", "jobs", "{\"id\": $resultSet}"))
         }catch(e: Exception) {
+            println(e);
             return@put(RESTStatusMessage("error", "jobs", "Unable to create job"))
         }
-    })
+    },{gson.toJson(it)})
 }

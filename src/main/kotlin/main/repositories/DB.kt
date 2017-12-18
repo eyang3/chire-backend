@@ -7,6 +7,7 @@ import kotlin.reflect.KMutableProperty
 import kotlin.reflect.full.createInstance
 import kotlin.reflect.full.memberProperties
 
+
 object DB {
     lateinit private var dataSource: PGPooledConnection
 
@@ -22,7 +23,8 @@ object DB {
     fun connection(): Connection {
         return this.dataSource.connection
     }
-    fun <T: Any> sqlRead(sql: String, entityClass: Array<KClass<T>>) {
+
+    fun <T : Any> sqlRead(sql: String, entityClass: Array<KClass<T>>) {
 
     }
 
@@ -50,10 +52,10 @@ object DB {
         println(fields);
         var sets = fields.map { it -> "$it = ?" }.joinToString(",")
         var query = "SELECT * FROM $table"
-        if(fields.size > 0) {
+        if (fields.size > 0) {
             query = "SELECT * FROM $table where $sets $limit $offset $sortBy"
         }
-        if(subset != "") {
+        if (subset != "") {
             query = "SELECT DISTINCT $subset FROM $table where $sets $limit $offset $sortBy"
         }
         println(query);
@@ -72,7 +74,7 @@ object DB {
         conn.close()
     }
 
-    fun <T : Any> crudSave(table: String, entityClass: KClass<T>, obj: T, id: Int?) {
+    fun <T : Any> crudSave(table: String, entityClass: KClass<T>, obj: T, id: Int?): Int {
         val objInfo = getDataMembers(entityClass)
         var members = objInfo.third
         val types = objInfo.second
@@ -96,11 +98,11 @@ object DB {
         var query = ""
         if (id != null) {
             var sets = fields.map { it -> "$it = ?" }.joinToString(",")
-            query = "UPDATE $table set $sets WHERE id = ?";
+            query = "UPDATE $table set $sets WHERE id = ? RETURNING id";
         } else {
             val cols = fields.joinToString(",")
             val question = fields.map { _ -> "?" }.joinToString(",")
-            query = "INSERT INTO $table($cols) VALUES ($question)";
+            query = "INSERT INTO $table($cols) VALUES ($question) RETURNING id";
         }
         val conn = this.connection()
         var statement = conn.prepareStatement(query);
@@ -108,8 +110,12 @@ object DB {
         if (id != null) {
             statement.setInt(notNullIndex.size + 1, id)
         }
-        statement.executeUpdate()
+        statement.executeQuery()
+        val last_updated_id = statement.getResultSet()
+        last_updated_id.next();
+        val m = last_updated_id.getInt(1);
         conn.close()
+        return m;
     }
 
     private fun <T : Any> fieldSetter(notNullIndex: List<Int?>, types: List<String>,
@@ -134,7 +140,6 @@ object DB {
             fieldCount++
         }
     }
-
 
     private fun <T : Any> getDataMembers(entityClass: KClass<T>): Triple<List<String>, List<String>, List<KMutableProperty<*>>> {
         var retVal = mutableListOf<T>()
