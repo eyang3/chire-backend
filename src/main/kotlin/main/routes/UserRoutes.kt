@@ -49,7 +49,7 @@ fun userRoutes() {
             var request: loginRequest = gson.fromJson(req.body(), loginRequest::class.java)
             var user = userrepo.valid(request.username, request.password!!)
             if (user != null) {
-                return@post (generateJWT(user));
+                return@post (RESTStatusMessage("success", "create", generateJWT(user!!)));
             } else {
                 return@post (RESTStatusMessage("error", "login", "Invalid Username or Password"));
             }
@@ -90,6 +90,40 @@ fun userRoutes() {
                 "Not valid reset string or expired reset string"));
 
     }, { gson.toJson(it) })
+
+    get("/functionsByRole", {req, res ->
+        println("something happens");
+        val jwt = req.cookie("auth")
+        println(jwt);
+        try {
+            var filter: Int? = req.queryParams("filter")?.toInt()
+            println("error here");
+            var user: User = readJWT(jwt)!!;
+            println(user);
+            var menu = mutableListOf<String>()
+            for(role in user.roles!!) {
+                if(role == 1 && (filter == null || filter == 1) ) {
+                    menu.add("create")
+                    menu.add("viewPostedJobs")
+                    menu.add("manageContacts")
+                    menu.add("organization")
+                }
+                if(role == 2 && (filter == null || filter == 2) ) {
+                    menu.add("toevaluate")
+                }
+                if(role == 3 && (filter == null || filter == 3) ) {
+                    menu.add("joblist")
+                    menu.add("searchjobs")
+                }
+            }
+            menu.add("settings")
+            return@get(menu)
+        } catch(e: Exception){
+            println(e);
+            return@get (RESTStatusMessage("error", "getFunctions", "" +
+                    "Invalid JWT Token"));
+        }
+    }, {gson.toJson(it)})
 
     post("/reset/:id", { req, res ->
         var check: String = req.params("id");
