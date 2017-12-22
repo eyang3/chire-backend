@@ -91,7 +91,7 @@ fun userRoutes() {
 
     }, { gson.toJson(it) })
 
-    get("/functionsByRole", {req, res ->
+    get("/ar/functionsByRole", {req, res ->
         val jwt = req.cookie("auth")
         try {
             var filter: Int? = req.queryParams("filter")?.toInt()

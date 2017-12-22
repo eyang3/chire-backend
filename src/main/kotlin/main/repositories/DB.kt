@@ -30,7 +30,7 @@ object DB {
 
     fun <T : Any> crudRead(table: String, entityClass: KClass<T>, obj: T,
                            limit: String = "", offset: String = "", sortBy: String = "",
-                           subset: String = ""): ResultSet {
+                           subset: String = "", distinct: Boolean = false): ResultSet {
         val conn = this.connection()
         val objInfo = getDataMembers(entityClass)
         var members = objInfo.third
@@ -49,14 +49,18 @@ object DB {
                 it.name
             }
         }.filter { it -> it != null }
-        println(fields);
         var sets = fields.map { it -> "$it = ?" }.joinToString(",")
-        var query = "SELECT * FROM $table"
-        if (fields.size > 0) {
-            query = "SELECT * FROM $table where $sets $limit $offset $sortBy"
+
+        var _subset = subset;
+        if(subset == "") {
+            _subset = "*"
         }
-        if (subset != "") {
-            query = "SELECT DISTINCT $subset FROM $table where $sets $limit $offset $sortBy"
+        var query = "SELECT $_subset FROM $table"
+        if (fields.size > 0) {
+            query = "SELECT $_subset FROM $table where $sets $limit $offset $sortBy"
+        }
+        if (distinct != null && distinct == true) {
+            query = "SELECT DISTINCT $_subset FROM $table where $sets $limit $offset $sortBy"
         }
         println(query);
         var statement = conn.prepareStatement(query);
