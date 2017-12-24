@@ -29,7 +29,7 @@ object DB {
     }
 
     fun <T : Any> crudRead(table: String, entityClass: KClass<T>, obj: T,
-                           limit: String = "", offset: String = "", sortBy: String = "",
+                           limit: String = "100", offset: String = "0", sortBy: String = "",
                            subset: String = "", distinct: Boolean = false): ResultSet {
         val conn = this.connection()
         val objInfo = getDataMembers(entityClass)
@@ -57,14 +57,18 @@ object DB {
         }
         var query = "SELECT $_subset FROM $table"
         if (fields.size > 0) {
-            query = "SELECT $_subset FROM $table where $sets $limit $offset $sortBy"
+            query = "SELECT $_subset FROM $table where $sets LIMIT ? OFFSET ? $sortBy"
         }
         if (distinct != null && distinct == true) {
-            query = "SELECT DISTINCT $_subset FROM $table where $sets $limit $offset $sortBy"
+            query = "SELECT DISTINCT $_subset FROM $table where $sets LIMIT ? OFFSET ? $sortBy"
         }
+
         println(query);
         var statement = conn.prepareStatement(query);
-        fieldSetter(notNullIndex, types, statement, members, obj, conn)
+        var current = fieldSetter(notNullIndex, types, statement, members, obj, conn)
+        current++;
+        statement.setInt(current++, limit.toInt())
+        statement.setInt(current++, offset.toInt())
         val resultSet = statement.executeQuery();
         conn.close()
         return resultSet;
@@ -124,7 +128,7 @@ object DB {
 
     private fun <T : Any> fieldSetter(notNullIndex: List<Int?>, types: List<String>,
                                       statement: PreparedStatement, members: List<KMutableProperty<*>>,
-                                      obj: T, conn: Connection) {
+                                      obj: T, conn: Connection): Int {
         var fieldCount = 0
         for (i in notNullIndex) {
             when (types[i!!]) {
@@ -143,6 +147,7 @@ object DB {
             }
             fieldCount++
         }
+        return(fieldCount);
     }
 
     private fun <T : Any> getDataMembers(entityClass: KClass<T>): Triple<List<String>, List<String>, List<KMutableProperty<*>>> {

@@ -11,18 +11,22 @@ object JobRepository {
     init {
 
     }
+
     fun create(title: String, salary: String, userRef: Int, body: String, keywords: String, category: String): Int {
         var job = Jobs(null, title, salary, userRef, body, keywords, category)
-        return(DB.crudSave("jobs", Jobs::class, job, null));
+        return (DB.crudSave("jobs", Jobs::class, job, null));
     }
-    fun read(pattern: Jobs, subset: String = ""): ResultSet {
-        return DB.crudRead("jobs", Jobs::class, pattern, subset = subset)
+
+    fun read(pattern: Jobs, subset: String = "", limit: String = "100", offset: String = "0"): ResultSet {
+        return DB.crudRead("jobs", Jobs::class, pattern, subset = subset, limit = limit, offset = offset)
     }
+
     fun update(id: Int, title: String?, salary: String?, userRef: Int?, body: String?,
                keywords: String?, category: String?) {
-        var job = Jobs(id, title, salary, userRef, body, keywords,  category)
+        var job = Jobs(id, title, salary, userRef, body, keywords, category)
         DB.crudSave("jobs", Jobs::class, job, id)
     }
+
     fun delete(id: Int) {
         DB.crudDelete("jobs", id)
     }
