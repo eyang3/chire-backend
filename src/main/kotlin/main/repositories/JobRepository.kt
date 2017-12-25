@@ -13,7 +13,7 @@ object JobRepository {
     init {
 
     }
-    fun create(title: String, salary: String, userRef: Int, body: String, keywords: String, category: String): Int {
+    fun create(title: String, salary: String, userRef: Int, body: String, keywords: String?, category: String?): Int {
         var job = Jobs(null, title, salary, userRef, body, keywords, category, null)
         return (DB.crudSave("jobs", Jobs::class, job, null));
     }

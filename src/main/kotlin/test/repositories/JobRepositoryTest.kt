@@ -24,7 +24,7 @@ class JobRepositoryTest {
     @Test
     fun create() {
         db.connection().prepareStatement("insert into users (id) values (1)").execute();
-        JobRepository.create("Title", "100000", 1, "<p>Hello</p>")
+        JobRepository.create("Title", "100000", 1, "<p>Hello</p>", null, null)
         val resultSet = db.connection().prepareStatement("select * from jobs").executeQuery()
         var jobs = db.getResults(resultSet, main.repositories.Jobs::class)
         assert(jobs.size == 1)
@@ -36,11 +36,11 @@ class JobRepositoryTest {
     @Test
     fun read() {
         db.connection().prepareStatement("insert into users (id) values (1)").execute();
-        JobRepository.create("Title", "100000", 1, "<p>Hello</p>")
-        JobRepository.create("Title1", "100000", 1, "<p>Hello</p>")
-        JobRepository.create("Title2", "100000", 1, "<p>Hello</p>")
-        JobRepository.create("Title", "300000", 1, "<p>Hello</p>")
-        var pattern = Jobs(null, "Title", null, null, null)
+        JobRepository.create("Title", "100000", 1, "<p>Hello</p>", null, null)
+        JobRepository.create("Title1", "100000", 1, "<p>Hello</p>", null, null)
+        JobRepository.create("Title2", "100000", 1, "<p>Hello</p>", null, null)
+        JobRepository.create("Title", "300000", 1, "<p>Hello</p>", null, null)
+        var pattern = Jobs(null, "Title", null, null, null, null, null, null)
         var resultSet = JobRepository.read(pattern)
         val results = DB.getResults(resultSet, Jobs::class)
         assert(results.size == 2)
@@ -56,17 +56,17 @@ class JobRepositoryTest {
     @Test
     fun update() {
         db.connection().prepareStatement("insert into users (id) values (1)").execute()
-        JobRepository.create("Title", "100000", 1, "<p>Hello</p>")
+        JobRepository.create("Title", "100000", 1, "<p>Hello</p>", null, null)
         var resultSet = db.connection().prepareStatement("select * from jobs").executeQuery()
         var jobs = db.getResults(resultSet, main.repositories.Jobs::class)
         var id = jobs[0].id;
-        JobRepository.update(id!!, "New Title", null, null, null);
+        JobRepository.update(id!!, "New Title", null, null, null, null, null);
         resultSet = db.connection().prepareStatement("select * from jobs").executeQuery()
         jobs = db.getResults(resultSet, main.repositories.Jobs::class)
         assert(jobs.size == 1)
         assert(jobs[0].body == "<p>Hello</p>")
         assert(jobs[0].title == "New Title")
-        JobRepository.update(id!!, "New Title2", "2", null, "New Stuff");
+        JobRepository.update(id!!, "New Title2", "2", null, "New Stuff", null, null);
         resultSet = db.connection().prepareStatement("select * from jobs").executeQuery()
         jobs = db.getResults(resultSet, main.repositories.Jobs::class)
         assert(jobs.size == 1)
@@ -78,7 +78,7 @@ class JobRepositoryTest {
     @Test
     fun delete() {
         db.connection().prepareStatement("insert into users (id) values (1)").execute()
-        JobRepository.create("Title", "100000", 1, "<p>Hello</p>")
+        JobRepository.create("Title", "100000", 1, "<p>Hello</p>", null, null)
         var resultSet = db.connection().prepareStatement("select * from jobs").executeQuery()
         var jobs = db.getResults(resultSet, main.repositories.Jobs::class)
         var id = jobs[0].id;
@@ -91,11 +91,11 @@ class JobRepositoryTest {
     @Test
     fun cascade() {
         db.connection().prepareStatement("insert into users (id) values (1)").execute();
-        JobRepository.create("Title", "100000", 1, "<p>Hello</p>")
-        JobRepository.create("Title1", "100000", 1, "<p>Hello</p>")
-        JobRepository.create("Title2", "100000", 1, "<p>Hello</p>")
-        JobRepository.create("Title", "300000", 1, "<p>Hello</p>")
-        var pattern = Jobs(null, "Title", null, null, null)
+        JobRepository.create("Title", "100000", 1, "<p>Hello</p>", null, null)
+        JobRepository.create("Title1", "100000", 1, "<p>Hello</p>", null, null)
+        JobRepository.create("Title2", "100000", 1, "<p>Hello</p>", null, null)
+        JobRepository.create("Title", "300000", 1, "<p>Hello</p>", null, null)
+        var pattern = Jobs(null, "Title", null, null, null, null, null, null)
         db.connection().prepareStatement("delete from users where id = 1").execute();
         var resultSet = JobRepository.read(pattern)
         var result = DB.getResults(resultSet, Jobs::class)
