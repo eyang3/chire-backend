@@ -1,19 +1,20 @@
 package main.repositories
 
+import java.sql.Date
 import java.sql.ResultSet
 
 data class Jobs(var id: Int?, var title: String?, var salary: String?,
-                var userref: Int?, var body: String?, var keywords: String?, var category: String?) {
-    constructor() : this(null, null, null, null, null, null, null)
+                var userref: Int?, var body: String?, var keywords: String?,
+                var category: String?, var last_modified: Date?) {
+    constructor() : this(null, null, null, null, null, null, null, null)
 }
 
 object JobRepository {
     init {
 
     }
-
     fun create(title: String, salary: String, userRef: Int, body: String, keywords: String, category: String): Int {
-        var job = Jobs(null, title, salary, userRef, body, keywords, category)
+        var job = Jobs(null, title, salary, userRef, body, keywords, category, null)
         return (DB.crudSave("jobs", Jobs::class, job, null));
     }
 
@@ -23,7 +24,7 @@ object JobRepository {
 
     fun update(id: Int, title: String?, salary: String?, userRef: Int?, body: String?,
                keywords: String?, category: String?) {
-        var job = Jobs(id, title, salary, userRef, body, keywords, category)
+        var job = Jobs(id, title, salary, userRef, body, keywords, category, null)
         DB.crudSave("jobs", Jobs::class, job, id)
     }
 

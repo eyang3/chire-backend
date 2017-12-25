@@ -23,7 +23,7 @@ fun JobRoutes() {
             var offset = ((page - 1) * pageSize).toString()
 
             var user: User = readJWT(jwt)!!;
-            var pattern = Jobs(null, null, null, user.id, null, null, null);
+            var pattern = Jobs(null, null, null, user.id, null, null, null, null);
             var resultSet = JobRepository.read(pattern, subset = "id,title,category,keywords", limit = limit, offset = offset)
             val results = DB.getResults(resultSet, Jobs::class, subset = "id,title,category,keywords")
             return@get (results)
@@ -35,7 +35,7 @@ fun JobRoutes() {
 
     get("/ar/job/:id", { req, res ->
         var id: String = req.params("id");
-        var pattern = Jobs(id.toInt(), null, null, null, null, null, null);
+        var pattern = Jobs(id.toInt(), null, null, null, null, null, null, null);
         var resultSet = JobRepository.read(pattern)
         val results = DB.getResults(resultSet, Jobs::class)
         if (results.size > 0) {
@@ -55,7 +55,6 @@ fun JobRoutes() {
         } catch (e: Exception) {
             return@put (RESTStatusMessage("error", "jobs", "Unable to update job"))
         }
-
     }, { gson.toJson(it) });
 
     delete("/ar/job/:id", { req, res ->
