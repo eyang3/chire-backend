@@ -52,7 +52,7 @@ object DB {
         var sets = fields.map { it -> "$it = ?" }.joinToString(",")
 
         var _subset = subset;
-        if(subset == "") {
+        if (subset == "") {
             _subset = "*"
         }
         var query = "SELECT $_subset FROM $table"
@@ -147,7 +147,7 @@ object DB {
             }
             fieldCount++
         }
-        return(fieldCount);
+        return (fieldCount);
     }
 
     private fun <T : Any> getDataMembers(entityClass: KClass<T>): Triple<List<String>, List<String>, List<KMutableProperty<*>>> {
@@ -159,10 +159,18 @@ object DB {
         return Triple<List<String>, List<String>, List<KMutableProperty<*>>>(fields, types, members)
     }
 
-    fun <T : Any> getResults(rs: ResultSet, entityClass: KClass<T>): List<T> {
+    fun <T : Any> getResults(rs: ResultSet, entityClass: KClass<T>, subset: String? = null): List<T> {
         var retVal = mutableListOf<T>()
         var entity = entityClass.createInstance()
         var members = entity.javaClass.kotlin.memberProperties as List<KMutableProperty<*>>
+        if (subset != null) {
+            members = members.filter { it ->
+                if (subset.indexOf(it.name) != -1) {
+                    return@filter (true)
+                }
+                return@filter (false)
+            }
+        }
         var fields = members.map { it -> it.name }.toList()
         var types = members.map { it -> it.returnType.toString() }.toList()
 

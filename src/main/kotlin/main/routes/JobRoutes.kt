@@ -10,7 +10,6 @@ import spark.Spark.*
 fun JobRoutes() {
     get("/ar/ListMyJobs", { req, res ->
         val jwt = req.cookie("auth")
-
         try {
             var pageSize = req.queryParams("pageSize")?.toInt();
             var page = req.queryParams("page")?.toInt();
@@ -26,13 +25,12 @@ fun JobRoutes() {
             var user: User = readJWT(jwt)!!;
             var pattern = Jobs(null, null, null, user.id, null, null, null);
             var resultSet = JobRepository.read(pattern, subset = "id,title,category,keywords", limit = limit, offset = offset)
-            val results = DB.getResults(resultSet, Jobs::class)
+            val results = DB.getResults(resultSet, Jobs::class, subset = "id,title,category,keywords")
             return@get (results)
         } catch (e: Exception) {
             println(e)
         }
         return@get (null);
-
     }, { gson.toJson(it) })
 
     get("/ar/job/:id", { req, res ->
