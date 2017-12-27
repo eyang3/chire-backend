@@ -13,6 +13,10 @@ fun JobRoutes() {
         try {
             var pageSize = req.queryParams("pageSize")?.toInt();
             var page = req.queryParams("page")?.toInt();
+            var textQuery: String? = req.queryParams("freeText");
+            if(textQuery == null) {
+                textQuery = "";
+            }
             if (pageSize == null) {
                 pageSize = 100;
             }
@@ -23,9 +27,11 @@ fun JobRoutes() {
             var offset = ((page - 1) * pageSize).toString()
 
             var user: User = readJWT(jwt)!!;
-            var pattern = Jobs(null, null, null, user.id, null, null, null, null);
-            var resultSet = JobRepository.read(pattern, subset = "id,title,category,keywords", limit = limit, offset = offset)
-            val results = DB.getResults(resultSet, Jobs::class, subset = "id,title,category,keywords")
+            var pattern = Jobs(null, null, null, user.id,
+                    null, null, null, null);
+            var resultSet = JobRepository.read(pattern, subset = "id,title,category,keywords,last_modified",
+                    limit = limit, offset = offset, fullText = textQuery)
+            val results = DB.getResults(resultSet, Jobs::class, subset = "id,title,category,keywords,last_modified")
             return@get (results)
         } catch (e: Exception) {
             println(e)

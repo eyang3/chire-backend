@@ -12,14 +12,18 @@ data class Jobs(var id: Int?, var title: String?, var salary: String?,
 object JobRepository {
     init {
 
+
     }
+
     fun create(title: String, salary: String, userRef: Int, body: String, keywords: String?, category: String?): Int {
         var job = Jobs(null, title, salary, userRef, body, keywords, category, null)
         return (DB.crudSave("jobs", Jobs::class, job, null));
     }
 
-    fun read(pattern: Jobs, subset: String = "", limit: String = "100", offset: String = "0"): ResultSet {
-        return DB.crudRead("jobs", Jobs::class, pattern, subset = subset, limit = limit, offset = offset)
+    fun read(pattern: Jobs, subset: String = "", limit: String = "100",
+             offset: String = "0", fullText: String = ""): ResultSet {
+        return DB.crudRead("jobs", Jobs::class, pattern, subset = subset, limit = limit, offset = offset,
+                indexFields = "tsv", freeText = fullText)
     }
 
     fun update(id: Int, title: String?, salary: String?, userRef: Int?, body: String?,
