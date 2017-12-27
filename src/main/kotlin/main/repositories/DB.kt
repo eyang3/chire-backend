@@ -47,9 +47,9 @@ object DB {
                 it.name
             }
         }.filter { it -> it != null }
-        var sets = fields.map { it -> "$it = ?" }.joinToString(",")
+        var sets = fields.map { it -> "$it = ?" }.joinToString(" AND ")
         if(freeText != "") {
-            sets = sets + indexFields;
+            sets = sets + " AND $indexFields @@ phraseto_tsquery(?) ";
         }
         var _subset = subset;
         if (subset == "") {
@@ -96,9 +96,9 @@ object DB {
                 it.name
             }
         }.filter { it -> it != null }
-        var sets = fields.map { it -> "$it = ?" }.joinToString(",")
+        var sets = fields.map { it -> "$it = ?" }.joinToString(" AND ")
         if(freeText != "") {
-            sets = sets + indexFields;
+            sets = sets + " AND $indexFields @@ phraseto_tsquery(?) ";
         }
         var _subset = subset;
         if (subset == "") {

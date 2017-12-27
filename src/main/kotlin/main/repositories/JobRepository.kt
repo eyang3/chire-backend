@@ -21,9 +21,16 @@ object JobRepository {
     }
 
     fun read(pattern: Jobs, subset: String = "", limit: String = "100",
-             offset: String = "0", fullText: String = ""): ResultSet {
+             offset: String = "0", freeText: String = ""): ResultSet {
         return DB.crudRead("jobs", Jobs::class, pattern, subset = subset, limit = limit, offset = offset,
-                indexFields = "tsv", freeText = fullText)
+                indexFields = "tsv", freeText = freeText)
+    }
+
+    fun totalRecords(pattern: Jobs, subset: String = "", freeText: String = ""): Int {
+        var resultSet = DB.countRows("jobs", Jobs::class, pattern,
+                subset = "", freeText = freeText, indexFields = "tsv");
+        resultSet.next();
+        return (resultSet.getInt(1))
     }
 
     fun update(id: Int, title: String?, salary: String?, userRef: Int?, body: String?,

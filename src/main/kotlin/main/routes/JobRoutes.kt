@@ -6,6 +6,9 @@ import main.repositories.Jobs
 import main.repositories.User
 import spark.Spark.*
 
+data class JobResult(var pages: List<Jobs>?, var totalRecords: Int?) {
+    constructor() : this(null, null)
+}
 
 fun JobRoutes() {
     get("/ar/ListMyJobs", { req, res ->
@@ -30,9 +33,12 @@ fun JobRoutes() {
             var pattern = Jobs(null, null, null, user.id,
                     null, null, null, null);
             var resultSet = JobRepository.read(pattern, subset = "id,title,category,keywords,last_modified",
-                    limit = limit, offset = offset, fullText = textQuery)
+                    limit = limit, offset = offset, freeText = textQuery)
             val results = DB.getResults(resultSet, Jobs::class, subset = "id,title,category,keywords,last_modified")
-            return@get (results)
+            val resultCount = JobRepository.totalRecords(pattern, subset = "id,title,category,keywords,last_modified",
+                    freeText = textQuery)
+            val retVal = JobResult(pages = results, totalRecords = resultCount)
+            return@get (retVal)
         } catch (e: Exception) {
             println(e)
         }
