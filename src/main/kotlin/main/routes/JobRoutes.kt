@@ -50,7 +50,7 @@ fun JobRoutes() {
         var request: Jobs = gson.fromJson(req.body(), Jobs::class.java)
         try {
             JobRepository.update(check.toInt(), request.title, request.salary, request.userref, request.body,
-                    request.category, request.keywords)
+                    request.keywords, request.category)
             return@put (RESTStatusMessage("success", "jobs", "{\"id\": $check}"))
         } catch (e: Exception) {
             return@put (RESTStatusMessage("error", "jobs", "Unable to update job"))
@@ -71,7 +71,7 @@ fun JobRoutes() {
         try {
             var request: Jobs = gson.fromJson(req.body(), Jobs::class.java)
             var resultSet = JobRepository.create(request.title!!, request.salary!!, user.id!!, request.body!!,
-                    request.category!!, request.keywords!!)
+                    request.keywords!!, request.category!!)
             println(resultSet);
             return@put (RESTStatusMessage("success", "jobs", "{\"id\": $resultSet}"))
         } catch (e: Exception) {

@@ -24,13 +24,11 @@ object DB {
         return this.dataSource.connection
     }
 
-    fun <T : Any> sqlRead(sql: String, entityClass: Array<KClass<T>>) {
-
-    }
 
     fun <T : Any> crudRead(table: String, entityClass: KClass<T>, obj: T,
                            limit: String = "100", offset: String = "0", sortBy: String = "",
-                           subset: String = "", distinct: Boolean = false): ResultSet {
+                           subset: String = "", distinct: Boolean = false,
+                           freeText: String = "", indexFields: String=""): ResultSet {
         val conn = this.connection()
         val objInfo = getDataMembers(entityClass)
         var members = objInfo.third
@@ -50,7 +48,9 @@ object DB {
             }
         }.filter { it -> it != null }
         var sets = fields.map { it -> "$it = ?" }.joinToString(",")
-
+        if(freeText != "") {
+            sets = sets + indexFields;
+        }
         var _subset = subset;
         if (subset == "") {
             _subset = "*"
@@ -63,12 +63,61 @@ object DB {
             query = "SELECT DISTINCT $_subset FROM $table where $sets LIMIT ? OFFSET ? $sortBy"
         }
 
-        println(query);
         var statement = conn.prepareStatement(query);
         var current = fieldSetter(notNullIndex, types, statement, members, obj, conn)
         current++;
+        if(freeText != "") {
+            statement.setString(current++, freeText);
+        }
         statement.setInt(current++, limit.toInt())
         statement.setInt(current++, offset.toInt())
+        val resultSet = statement.executeQuery();
+        conn.close()
+        return resultSet;
+    }
+    fun <T : Any> countRows(table: String, entityClass: KClass<T>, obj: T,
+                           subset: String = "", distinct: Boolean = false,
+                           freeText: String = "", indexFields: String=""): ResultSet {
+        val conn = this.connection()
+        val objInfo = getDataMembers(entityClass)
+        var members = objInfo.third
+        val types = objInfo.second
+        val notNullIndex = members.mapIndexed { index, it ->
+            if (it.getter.call(obj) != null) {
+                index
+            } else {
+                null
+            }
+        }.filter { it -> it != null }
+        val fields = members.map { it ->
+            if (it.getter.call(obj) == null) {
+                null
+            } else {
+                it.name
+            }
+        }.filter { it -> it != null }
+        var sets = fields.map { it -> "$it = ?" }.joinToString(",")
+        if(freeText != "") {
+            sets = sets + indexFields;
+        }
+        var _subset = subset;
+        if (subset == "") {
+            _subset = "*"
+        }
+        var query = "SELECT COUNT(*) FROM $table"
+        if (fields.size > 0) {
+            query = "SELECT COUNT(*) FROM $table where $sets"
+        }
+        if (distinct != null && distinct == true) {
+            query = "SELECT COUNT(DISTINCT($_subset)) FROM $table where $sets"
+        }
+
+        var statement = conn.prepareStatement(query);
+        var current = fieldSetter(notNullIndex, types, statement, members, obj, conn)
+        current++;
+        if(freeText != "") {
+            statement.setString(current++, freeText);
+        }
         val resultSet = statement.executeQuery();
         conn.close()
         return resultSet;
