@@ -24,11 +24,13 @@ object DB {
         return this.dataSource.connection
     }
 
-
     fun <T : Any> crudRead(table: String, entityClass: KClass<T>, obj: T,
                            limit: String = "100", offset: String = "0", sortBy: String = "",
                            subset: String = "", distinct: Boolean = false,
-                           freeText: String = "", indexFields: String=""): ResultSet {
+                           freeText:
+                           String = "", indexFields: String = "", dir: String = "ASC"): ResultSet {
+
+
         val conn = this.connection()
         val objInfo = getDataMembers(entityClass)
         var members = objInfo.third
@@ -48,37 +50,43 @@ object DB {
             }
         }.filter { it -> it != null }
         var sets = fields.map { it -> "$it = ?" }.joinToString(" AND ")
-        if(freeText != "") {
+        if (freeText != "") {
             sets = sets + " AND $indexFields @@ phraseto_tsquery(?) ";
         }
-        var _subset = subset;
+        var _subset = subset
         if (subset == "") {
             _subset = "*"
         }
         var query = "SELECT $_subset FROM $table"
+        var _sortBy = ""
+        if (sortBy != "") {
+            _sortBy = " ORDER BY $sortBy $dir "
+        }
         if (fields.size > 0) {
-            query = "SELECT $_subset FROM $table where $sets LIMIT ? OFFSET ? $sortBy"
+            query = "SELECT $_subset FROM $table where $sets $_sortBy LIMIT ? OFFSET ? "
         }
         if (distinct != null && distinct == true) {
-            query = "SELECT DISTINCT $_subset FROM $table where $sets LIMIT ? OFFSET ? $sortBy"
+            query = "SELECT DISTINCT $_subset FROM $table where $sets $_sortBy LIMIT ? OFFSET ?"
         }
 
         var statement = conn.prepareStatement(query);
         var current = fieldSetter(notNullIndex, types, statement, members, obj, conn)
         current++;
-        if(freeText != "") {
+        if (freeText != "") {
             statement.setString(current++, freeText);
         }
         statement.setInt(current++, limit.toInt())
         statement.setInt(current++, offset.toInt())
+
         println(statement)
         val resultSet = statement.executeQuery();
         conn.close()
         return resultSet;
     }
+
     fun <T : Any> countRows(table: String, entityClass: KClass<T>, obj: T,
-                           subset: String = "", distinct: Boolean = false,
-                           freeText: String = "", indexFields: String=""): ResultSet {
+                            subset: String = "", distinct: Boolean = false,
+                            freeText: String = "", indexFields: String = ""): ResultSet {
         val conn = this.connection()
         val objInfo = getDataMembers(entityClass)
         var members = objInfo.third
@@ -98,7 +106,7 @@ object DB {
             }
         }.filter { it -> it != null }
         var sets = fields.map { it -> "$it = ?" }.joinToString(" AND ")
-        if(freeText != "") {
+        if (freeText != "") {
             sets = sets + " AND $indexFields @@ phraseto_tsquery(?) ";
         }
         var _subset = subset;
@@ -116,7 +124,7 @@ object DB {
         var statement = conn.prepareStatement(query);
         var current = fieldSetter(notNullIndex, types, statement, members, obj, conn)
         current++;
-        if(freeText != "") {
+        if (freeText != "") {
             statement.setString(current++, freeText);
         }
         val resultSet = statement.executeQuery();
@@ -193,7 +201,7 @@ object DB {
                     statement.setArray(fieldCount + 1, array)
                 }
                 "java.sql.Timestamp?" -> statement.setTimestamp(fieldCount + 1, members[i].getter.call(obj) as Timestamp)
-                else -> null
+                "java.sql.Date?" -> statement.setDate(fieldCount + 1, members[i].getter.call(obj) as Date)
             }
             fieldCount++
         }
@@ -239,6 +247,7 @@ object DB {
                         "kotlin.collections.List<kotlin.Int>?" ->
                             (rs.getArray(fields[i]).array as Array<out Any>).toList() as List<T>
                         "java.sql.Timestamp?" -> rs.getTimestamp(fields[i])
+                        "java.sql.Date?" -> rs.getDate(fields[i])
                         else -> null
                     }
                 } catch (e: Exception) {

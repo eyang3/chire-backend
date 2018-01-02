@@ -17,6 +17,21 @@ fun JobRoutes() {
             var pageSize = req.queryParams("pageSize")?.toInt();
             var page = req.queryParams("page")?.toInt();
             var textQuery: String? = req.queryParams("freeText");
+            var sortBy: String? = req.queryParams("sortBy");
+            if(sortBy == null) {
+                sortBy = ""
+            }
+            if("title,category,keywords,last_modified".indexOf(sortBy) == -1) {
+                println("error");
+                sortBy = ""
+            }
+
+            var dir: String? = req.queryParams("dir");
+
+            if(dir != "ASC" && dir != "DESC") {
+                dir = ""
+            }
+
             if(textQuery == null) {
                 textQuery = "";
             }
@@ -32,8 +47,9 @@ fun JobRoutes() {
             var user: User = readJWT(jwt)!!;
             var pattern = Jobs(null, null, null, user.id,
                     null, null, null, null);
+
             var resultSet = JobRepository.read(pattern, subset = "id,title,category,keywords,last_modified",
-                    limit = limit, offset = offset, freeText = textQuery)
+                    limit = limit, offset = offset, freeText = textQuery, sortBy = sortBy, dir=dir)
             val results = DB.getResults(resultSet, Jobs::class, subset = "id,title,category,keywords,last_modified")
             val resultCount = JobRepository.totalRecords(pattern, subset = "id,title,category,keywords,last_modified",
                     freeText = textQuery)
