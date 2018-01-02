@@ -56,7 +56,7 @@ fun JobRoutes() {
             val retVal = JobResult(pages = results, totalRecords = resultCount)
             return@get (retVal)
         } catch (e: Exception) {
-            println(e)
+            println(e.printStackTrace())
         }
         return@get (null);
     }, { gson.toJson(it) })

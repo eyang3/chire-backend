@@ -24,10 +24,6 @@ object JobRepository {
 
     fun read(pattern: Jobs, subset: String = "", limit: String = "100",
              offset: String = "0", freeText: String = "", dir: String="ASC", sortBy: String = ""): ResultSet {
-        println("xxxxxxxxxxxxxxxxxxxxxxxx")
-        println(dir);
-        println(sortBy);
-        println("xxxxxxxxxxxxxxxxxxxxxxxx")
         return DB.crudRead("jobs", Jobs::class, pattern, subset = subset, limit = limit, offset = offset,
                 indexFields = "tsv", freeText = freeText, dir=dir, sortBy = sortBy)
     }

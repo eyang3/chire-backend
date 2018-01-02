@@ -1,7 +1,10 @@
 package main.repositories
 
+import org.postgresql.ds.PGConnectionPoolDataSource
 import org.postgresql.ds.PGPooledConnection
+import org.postgresql.ds.PGPoolingDataSource
 import java.sql.*
+import javax.sql.ConnectionPoolDataSource
 import kotlin.reflect.KClass
 import kotlin.reflect.KMutableProperty
 import kotlin.reflect.full.createInstance
@@ -9,15 +12,18 @@ import kotlin.reflect.full.memberProperties
 
 
 object DB {
-    lateinit private var dataSource: PGPooledConnection
+    lateinit private var dataSource: PGConnectionPoolDataSource
 
     init {
 
     }
 
     fun connect(url: String, user: String, password: String?) {
-        val con = DriverManager.getConnection(url, user, password)
-        this.dataSource = PGPooledConnection(con, true)
+        this.dataSource = PGConnectionPoolDataSource()
+        this.dataSource.url = url
+        this.dataSource.user = user
+        this.dataSource.password = password
+        this.dataSource.isDefaultAutoCommit = true
     }
 
     fun connection(): Connection {
