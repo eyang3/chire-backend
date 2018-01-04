@@ -133,6 +133,7 @@ object DB {
         if (freeText != "") {
             statement.setString(current++, freeText);
         }
+        println(statement)
         val resultSet = statement.executeQuery();
         conn.close()
         return resultSet;
