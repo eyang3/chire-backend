@@ -44,8 +44,6 @@ object JobRepository {
     }
     fun bulkDelete(ids: List<Int>) {
         DB.bulkDelete("jobs", ids)
-
     }
-
 
 }
