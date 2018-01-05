@@ -138,7 +138,15 @@ object DB {
         conn.close()
         return resultSet;
     }
+    fun bulkDelete(table: String, ids: List<Int>) {
+        val conn = this.connection()
+        val IdFields = ids.map{ id -> "?"}.joinToString(",");
+        var statement = conn.prepareStatement("DELETE FROM $table where id in ($IdFields)");
+        ids.forEachIndexed { index, i -> statement.setInt(index + 1, ids[index]) }
+        statement.execute()
+        conn.close()
 
+    }
     fun crudDelete(table: String, id: Int) {
         val conn = this.connection()
         var statement = conn.prepareStatement("DELETE FROM $table where id = ?");

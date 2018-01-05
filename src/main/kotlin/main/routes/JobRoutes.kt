@@ -1,10 +1,14 @@
 package routes
 
+import com.google.gson.annotations.SerializedName
 import main.repositories.DB
 import main.repositories.JobRepository
 import main.repositories.Jobs
 import main.repositories.User
 import spark.Spark.*
+
+data class idList(@SerializedName("ids") val ids: Array<Int>)
+
 
 data class JobResult(var pages: List<Jobs>?, var totalRecords: Int?) {
     constructor() : this(null, null)
@@ -85,9 +89,17 @@ fun JobRoutes() {
         }
     }, { gson.toJson(it) });
 
-    delete("/ar/job/:id", { req, res ->
-        var id: String = req.params("id");
-        var resultSet = JobRepository.delete(id.toInt())
+    delete("/ar/job", { req, res ->
+        println("I am here");
+        try {
+            println(req.body())
+            var request: idList = gson.fromJson(req.body(), idList::class.java)
+            JobRepository.bulkDelete(request.ids.toList())
+        } catch(e: Exception) {
+            println(e)
+        }
+
+
         return@delete (RESTStatusMessage("success", "jobs", ""))
 
     })
