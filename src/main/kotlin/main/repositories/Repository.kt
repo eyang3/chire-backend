@@ -5,7 +5,7 @@ import java.sql.ResultSet
 
 
 open class Repository {
-    val table = "NA"
+    open val table = "NA"
 
     init {
     }

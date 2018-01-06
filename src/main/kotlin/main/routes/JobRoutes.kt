@@ -98,10 +98,7 @@ fun JobRoutes() {
         } catch(e: Exception) {
             println(e)
         }
-
-
         return@delete (RESTStatusMessage("success", "jobs", ""))
-
     })
 
     put("/ar/job", { req, res ->

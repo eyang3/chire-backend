@@ -12,6 +12,7 @@ fun main(args: Array<String>) {
     DB.connect("jdbc:postgresql://127.0.0.1/chire", "postgres", System.getenv("PG_PASS"))
     userRoutes()
     JobRoutes()
+    ContactRoutes()
     //allow routes to match with trailing slash
     before("/ar/*", { req, res ->
         val jwt = req.cookie("auth")
