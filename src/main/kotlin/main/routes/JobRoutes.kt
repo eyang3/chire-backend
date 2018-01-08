@@ -1,6 +1,8 @@
 package routes
 
 import com.google.gson.annotations.SerializedName
+import io.jsonwebtoken.Jwts
+import io.jsonwebtoken.SignatureAlgorithm
 import main.repositories.DB
 import main.repositories.JobRepository
 import main.repositories.Jobs
@@ -14,7 +16,41 @@ data class JobResult(var pages: List<Jobs>?, var totalRecords: Int?) {
     constructor() : this(null, null)
 }
 
+
+fun encryptRouteInstruction(id: Int, action: String): String {
+    var roleClaims = mutableMapOf<String, Any>()
+    roleClaims["jobRef"] = id
+    roleClaims["action"] = action
+    var token: String = Jwts.builder()
+            .setClaims(roleClaims.toMap())
+            .signWith(SignatureAlgorithm.HS512, "HelloWorld")
+            .compact()
+    return (token)
+}
+
 fun JobRoutes() {
+    get("/ar/applicationLink/:id", { req, res ->
+        var id: Int = req.params("id") as Int;
+        var token = encryptRouteInstruction(id, "apply")
+        return@get (RESTStatusMessage("success", "jobs", "{\"token\": $token}"));
+    }, { gson.toJson(it) })
+    
+    put("/ar/job", { req, res ->
+        val jwt = req.cookie("auth")
+        var user: User = readJWT(jwt)!!;
+        var request: Jobs = gson.fromJson(req.body(), Jobs::class.java)
+        try {
+            var request: Jobs = gson.fromJson(req.body(), Jobs::class.java)
+            var resultSet = JobRepository.create(request.title!!, request.salary, user.id!!, request.body,
+                    request.keywords, request.category)
+            return@put (RESTStatusMessage("success", "jobs", "{\"id\": $resultSet}"))
+        } catch (e: Exception) {
+            println(e);
+            return@put (RESTStatusMessage("error", "jobs", "Unable to create job"))
+        }
+
+    }, { gson.toJson(it) })
+
     get("/ar/ListMyJobs", { req, res ->
         val jwt = req.cookie("auth")
         try {
@@ -22,21 +58,21 @@ fun JobRoutes() {
             var page = req.queryParams("page")?.toInt();
             var textQuery: String? = req.queryParams("freeText");
             var sortBy: String? = req.queryParams("sortBy");
-            if(sortBy == null) {
+            if (sortBy == null) {
                 sortBy = ""
             }
-            if("title,category,keywords,last_modified".indexOf(sortBy) == -1) {
+            if ("title,category,keywords,last_modified".indexOf(sortBy) == -1) {
                 println("error");
                 sortBy = ""
             }
 
             var dir: String? = req.queryParams("dir");
 
-            if(dir != "ASC" && dir != "DESC") {
+            if (dir != "ASC" && dir != "DESC") {
                 dir = ""
             }
 
-            if(textQuery == null) {
+            if (textQuery == null) {
                 textQuery = "";
             }
             if (pageSize == null) {
@@ -53,7 +89,7 @@ fun JobRoutes() {
                     null, null, null, null);
 
             var resultSet = JobRepository.read(pattern, subset = "id,title,category,keywords,last_modified",
-                    limit = limit, offset = offset, freeText = textQuery, sortBy = sortBy, dir=dir)
+                    limit = limit, offset = offset, freeText = textQuery, sortBy = sortBy, dir = dir)
             val results = DB.getResults(resultSet, Jobs::class, subset = "id,title,category,keywords,last_modified")
             val resultCount = JobRepository.totalRecords(pattern, subset = "id,title,category,keywords,last_modified",
                     freeText = textQuery)
@@ -90,12 +126,10 @@ fun JobRoutes() {
     }, { gson.toJson(it) });
 
     delete("/ar/job", { req, res ->
-        println("I am here");
         try {
-            println(req.body())
             var request: idList = gson.fromJson(req.body(), idList::class.java)
             JobRepository.bulkDelete(request.ids.toList())
-        } catch(e: Exception) {
+        } catch (e: Exception) {
             println(e)
         }
         return@delete (RESTStatusMessage("success", "jobs", ""))
@@ -115,4 +149,8 @@ fun JobRoutes() {
             return@put (RESTStatusMessage("error", "jobs", "Unable to create job"))
         }
     }, { gson.toJson(it) })
+
+    post("/ar/job/getLink", { req, res ->
+
+    })
 }

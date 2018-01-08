@@ -4,6 +4,8 @@ import main.repositories.Contact
 import main.repositories.ContactRepository
 import main.repositories.DB
 import main.repositories.User
+import spark.Spark
+import spark.Spark.delete
 import spark.Spark.get
 
 data class Results<T>(var pages: List<T>?, var totalRecords: Int?) {
@@ -69,7 +71,32 @@ fun ContactRoutes() {
         if (results.size > 0) {
             return@get (results[0])
         } else {
-            return@get (null);
+            return@get (null)
+        }
+    }, { gson.toJson(it) })
+
+    delete("/ar/contact", { req, res ->
+        try {
+            var request: idList = gson.fromJson(req.body(), idList::class.java)
+            ContactRepository.bulkDelete(request.ids.toList())
+        } catch (e: Exception) {
+            println(e)
+        }
+        return@delete (RESTStatusMessage("success", "jobs", ""))
+    })
+    Spark.put("/ar/contact", { req, res ->
+        val jwt = req.cookie("auth")
+        var user: User = readJWT(jwt)!!;
+        println(req.body());
+        var request: Contact = gson.fromJson(req.body(), Contact::class.java)
+        try {
+            var request: Contact = gson.fromJson(req.body(), Contact::class.java)
+            var resultSet = ContactRepository.create(userRef = user.id!!, email = request.email!!, name = request.name, label=request.label)
+            return@put (RESTStatusMessage("success", "contacts", "{\"id\": $resultSet}"))
+        } catch (e: Exception) {
+            println(request);
+            println(e);
+            return@put (RESTStatusMessage("error", "contacts", "Unable to create contact"))
         }
     }, { gson.toJson(it) })
 }

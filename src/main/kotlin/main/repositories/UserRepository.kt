@@ -26,9 +26,28 @@ object UserRepository {
     init {
 
     }
+    fun update(id: Int, email: String, password: String, role: Int) {
+        var u = User(id, email, password, null, listOf<Int>(role), null)
+        val conn = DB.connection()
+        var saltHash = stringHash(LocalDateTime.now().toString())
+        var saltedPassword = password + saltHash
+        val passwordHash = stringHash(saltedPassword)
+        u.salt = saltHash
+        u.password = passwordHash
+        var array = conn.createArrayOf("INTEGER", u.roles!!.toTypedArray())
+        var statement = conn.prepareStatement("UPDATE USERS set email = ?, password = ?, salt = ?, roles = ? where id = ?")
+        statement.setString(1, u.email)
+        statement.setString(2, u.password)
+        statement.setString(3, u.salt)
+        statement.setArray(4, array)
+        statement.setInt(5, id)
+        statement.executeUpdate()
+        conn.close()
+
+    }
 
     fun signup(email: String, password: String?, role: Int) {
-        var u = User(null, email, password, null, listOf<Int>(1), null)
+        var u = User(null, email, password, null, listOf<Int>(role), null)
         val conn = DB.connection()
         var statement = conn.prepareStatement("SELECT * FROM USERS where email = ?")
         statement.setString(1, email)

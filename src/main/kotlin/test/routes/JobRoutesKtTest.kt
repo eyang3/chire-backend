@@ -82,7 +82,7 @@ class JobRoutesKtTest {
         var badToken = false;
         val httpClient = HttpClientBuilder.create().build()
         val gson = Gson()
-        val loginInfo = loginRequest("IamSpazzy@gmail.com", "testpass");
+        val loginInfo = loginRequest("IamSpazzy@gmail.com", "testpass", 1);
         val payload = gson.toJson(loginInfo)
         MakeRequest("POST", "create", payload, null)
         val authtoken = MakeRequest("POST", "login", payload, null)
@@ -101,7 +101,7 @@ class JobRoutesKtTest {
         var badToken = true;
         val httpClient = HttpClientBuilder.create().build()
         val gson = Gson()
-        val loginInfo = loginRequest("IamSpazzy@gmail.com", "testpass");
+        val loginInfo = loginRequest("IamSpazzy@gmail.com", "testpass", role = 1);
         val payload = gson.toJson(loginInfo)
         MakeRequest("POST", "create", payload, null)
         val authtoken = MakeRequest("POST", "login", payload, null)

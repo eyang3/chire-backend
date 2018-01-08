@@ -10,7 +10,8 @@ import spark.Spark.get
 import spark.Spark.post
 
 data class loginRequest(@SerializedName("username") val username: String,
-                        @SerializedName("password") val password: String?)
+                        @SerializedName("password") val password: String?,
+                        @SerializedName("role") var role: Int?)
 
 val gson = Gson()
 
@@ -63,7 +64,24 @@ fun userRoutes() {
     post("/create", { req, res ->
         try {
             var request: loginRequest = gson.fromJson(req.body(), loginRequest::class.java)
-            userrepo.signup(request.username, request.password, 3);
+            if(request.role == null) {
+                request.role = 3;
+            }
+            userrepo.signup(request.username, request.password, request.role!!);
+            var user = userrepo.valid(request.username, request.password!!)
+            return@post (RESTStatusMessage("success", "create", generateJWT(user!!)));
+        } catch (e: Exception) {
+            return@post (RESTStatusMessage("error", "create", e.message.toString()));
+        }
+    }, { gson.toJson(it) })
+
+    post("/ar/update", { req, res ->
+        val jwt = req.cookie("auth")
+        var user: User = readJWT(jwt)!!;
+        try {
+            var request: loginRequest = gson.fromJson(req.body(), loginRequest::class.java)
+            userrepo.update(id = user.id!!, email = request.username!!, password = request.password!!,
+                    role = user.roles!![0]);
             var user = userrepo.valid(request.username, request.password!!)
             return@post (RESTStatusMessage("success", "create", generateJWT(user!!)));
         } catch (e: Exception) {
@@ -107,9 +125,11 @@ fun userRoutes() {
                     menu.add("organization")
                 }
                 if(role == 2 && (filter == null || filter == 2) ) {
+                    menu.add("joblistEval")
                     menu.add("toevaluate")
                 }
                 if(role == 3 && (filter == null || filter == 3) ) {
+                    menu.add("apply")
                     menu.add("joblist")
                     menu.add("searchjobs")
                 }
