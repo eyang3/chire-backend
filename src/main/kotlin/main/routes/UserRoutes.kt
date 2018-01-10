@@ -4,14 +4,16 @@ import com.google.gson.Gson
 import com.google.gson.annotations.SerializedName
 import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.SignatureAlgorithm
+import main.repositories.ApplicationRepository
 import main.repositories.User
 import main.repositories.UserRepository
 import spark.Spark.get
 import spark.Spark.post
 
-data class loginRequest(@SerializedName("username") val username: String,
+data class loginRequest(@SerializedName("username") val username: String?,
                         @SerializedName("password") val password: String?,
-                        @SerializedName("role") var role: Int?)
+                        @SerializedName("role") var role: Int?,
+                        @SerializedName("token") var token: String?)
 
 val gson = Gson()
 
@@ -48,7 +50,7 @@ fun userRoutes() {
     post("/login", { req, res ->
         try {
             var request: loginRequest = gson.fromJson(req.body(), loginRequest::class.java)
-            var user = userrepo.valid(request.username, request.password!!)
+            var user = userrepo.valid(request.username!!, request.password!!)
             if (user != null) {
                 return@post (RESTStatusMessage("success", "create", generateJWT(user!!)));
             } else {
@@ -64,17 +66,42 @@ fun userRoutes() {
     post("/create", { req, res ->
         try {
             var request: loginRequest = gson.fromJson(req.body(), loginRequest::class.java)
-            if(request.role == null) {
+            if (request.role == null) {
                 request.role = 3;
             }
-            userrepo.signup(request.username, request.password, request.role!!);
-            var user = userrepo.valid(request.username, request.password!!)
+            userrepo.signup(request.username!!, request.password, request.role!!);
+            var user = userrepo.valid(request.username!!, request.password!!)
             return@post (RESTStatusMessage("success", "create", generateJWT(user!!)));
         } catch (e: Exception) {
             return@post (RESTStatusMessage("error", "create", e.message.toString()));
         }
     }, { gson.toJson(it) })
+    post("/ar/validate", { req, res ->
+        val jwt = req.cookie("auth")
+        var request: loginRequest = gson.fromJson(req.body(), loginRequest::class.java)
 
+        if (request.token == null) {
+            return@post (RESTStatusMessage("success", "redirect", "do nothing"));
+        }
+        val redirectToken = Jwts.parser().setSigningKey("HelloWorld").parse(request.token)
+        var claims = redirectToken.body as Map<String, Any>;
+        var user: User = readJWT(jwt)!!
+        if (user == null) {
+            return@post (RESTStatusMessage("success", "redirect", "not logged in"));
+        } else if (user.roles!![0] == 3 && claims["action"] as String != "apply") {
+            return@post (RESTStatusMessage("success", "redirect", "invalid"));
+        } else if (user.roles!![0] == 2 && claims["action"] as String == "apply") {
+            return@post (RESTStatusMessage("success", "redirect", "invalid"));
+        }
+        println(claims);
+        if (user.roles!![0] == 3) {
+            ApplicationRepository.create(claims["jobRef"] as Int, user.id!!, claims["hrRef"] as Int, "", "")
+            return@post (RESTStatusMessage("success", "redirect", gson.toJson(claims)));
+        }
+        return@post (RESTStatusMessage("success", "redirect", "do nothing"));
+
+
+    }, { gson.toJson(it) })
     post("/ar/update", { req, res ->
         val jwt = req.cookie("auth")
         var user: User = readJWT(jwt)!!;
@@ -82,7 +109,7 @@ fun userRoutes() {
             var request: loginRequest = gson.fromJson(req.body(), loginRequest::class.java)
             userrepo.update(id = user.id!!, email = request.username!!, password = request.password!!,
                     role = user.roles!![0]);
-            var user = userrepo.valid(request.username, request.password!!)
+            var user = userrepo.valid(request.username!!, request.password!!)
             return@post (RESTStatusMessage("success", "create", generateJWT(user!!)));
         } catch (e: Exception) {
             return@post (RESTStatusMessage("error", "create", e.message.toString()));
@@ -109,7 +136,7 @@ fun userRoutes() {
 
     }, { gson.toJson(it) })
 
-    get("/ar/functionsByRole", {req, res ->
+    get("/ar/functionsByRole", { req, res ->
         val jwt = req.cookie("auth")
         try {
             var filter: Int? = req.queryParams("filter")?.toInt()
@@ -117,31 +144,31 @@ fun userRoutes() {
             var user: User = readJWT(jwt)!!;
             println(user);
             var menu = mutableListOf<String>()
-            for(role in user.roles!!) {
-                if(role == 1 && (filter == null || filter == 1) ) {
+            for (role in user.roles!!) {
+                if (role == 1 && (filter == null || filter == 1)) {
                     menu.add("create")
                     menu.add("viewPostedJobs")
                     menu.add("manageContacts")
                     menu.add("organization")
                 }
-                if(role == 2 && (filter == null || filter == 2) ) {
+                if (role == 2 && (filter == null || filter == 2)) {
                     menu.add("joblistEval")
                     menu.add("toevaluate")
                 }
-                if(role == 3 && (filter == null || filter == 3) ) {
+                if (role == 3 && (filter == null || filter == 3)) {
                     menu.add("apply")
                     menu.add("joblist")
                     menu.add("searchjobs")
                 }
             }
             menu.add("settings")
-            return@get(menu)
-        } catch(e: Exception){
+            return@get (menu)
+        } catch (e: Exception) {
             println(e);
             return@get (RESTStatusMessage("error", "getFunctions", "" +
                     "Invalid JWT Token"));
         }
-    }, {gson.toJson(it)})
+    }, { gson.toJson(it) })
 
     post("/reset/:id", { req, res ->
         var check: String = req.params("id");

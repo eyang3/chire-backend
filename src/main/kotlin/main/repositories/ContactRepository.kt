@@ -2,8 +2,8 @@ package main.repositories
 
 import repositories.Repository
 
-data class Contact(var id: Int?, var userref: Int?, var email: String?, var name: String?, var label: String?) {
-    constructor() : this(null, null, null, null, null)
+data class Contact(var id: Int?, var userref: Int?, var contactref: Int?, var email: String?, var name: String?, var label: String?) {
+    constructor() : this(null, null, null, null, null, null)
 }
 
 object ContactRepository : Repository() {
@@ -14,12 +14,12 @@ object ContactRepository : Repository() {
     }
 
     fun create(userRef: Int, email: String, name: String?, label: String?): Int {
-        val contact = Contact(userref = userRef, email = email, name = name, label = label, id = null)
+        val contact = Contact(userref = userRef, contactref = null, email = email, name = name, label = label, id = null)
         return (DB.crudSave(this.table, Contact::class, contact, null));
     }
 
-    fun update(id: Int, userRef: Int, email: String, name: String?, label: String?) {
-        var contact = Contact(userref = userRef, email = email, name = name, label = label, id = id)
+    fun update(id: Int, userRef: Int, email: String, name: String?, label: String?, contactRef: Int) {
+        var contact = Contact(userref = userRef, email = email, name = name, label = label, id = id, contactref = contactRef)
         DB.crudSave(this.table, Contact::class, contact, id)
     }
 

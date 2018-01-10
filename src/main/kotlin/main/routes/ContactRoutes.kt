@@ -48,7 +48,7 @@ fun ContactRoutes() {
             var offset = ((page - 1) * pageSize).toString()
 
             var user: User = readJWT(jwt)!!;
-            var pattern = Contact(null, user.id, null, null, null);
+            var pattern = Contact(null, user.id, null, null, null, null);
 
             var resultSet = ContactRepository.read(pattern, subset = "id,email,name,label",
                     limit = limit, offset = offset, freeText = textQuery, sortBy = sortBy, dir = dir)
@@ -65,7 +65,7 @@ fun ContactRoutes() {
 
     get("/ar/contact/:id", { req, res ->
         var id: String = req.params("id")
-        var pattern = Contact(id.toInt(), null, null, null, null);
+        var pattern = Contact(id.toInt(), null, null, null, null, null);
         var resultSet = ContactRepository.read(pattern)
         val results = DB.getResults(resultSet, Contact::class)
         if (results.size > 0) {

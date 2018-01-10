@@ -34,7 +34,7 @@ fun JobRoutes() {
         var token = encryptRouteInstruction(id, "apply")
         return@get (RESTStatusMessage("success", "jobs", "{\"token\": $token}"));
     }, { gson.toJson(it) })
-    
+
     put("/ar/job", { req, res ->
         val jwt = req.cookie("auth")
         var user: User = readJWT(jwt)!!;
@@ -86,7 +86,7 @@ fun JobRoutes() {
 
             var user: User = readJWT(jwt)!!;
             var pattern = Jobs(null, null, null, user.id,
-                    null, null, null, null);
+                    null, null, null, null, null);
 
             var resultSet = JobRepository.read(pattern, subset = "id,title,category,keywords,last_modified",
                     limit = limit, offset = offset, freeText = textQuery, sortBy = sortBy, dir = dir)
@@ -103,7 +103,7 @@ fun JobRoutes() {
 
     get("/ar/job/:id", { req, res ->
         var id: String = req.params("id");
-        var pattern = Jobs(id.toInt(), null, null, null, null, null, null, null);
+        var pattern = Jobs(id.toInt(), null, null, null, null, null, null, null, null);
         var resultSet = JobRepository.read(pattern)
         val results = DB.getResults(resultSet, Jobs::class)
         if (results.size > 0) {

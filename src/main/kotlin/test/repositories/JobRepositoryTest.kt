@@ -40,7 +40,7 @@ class JobRepositoryTest {
         JobRepository.create("Title1", "100000", 1, "<p>Hello</p>", null, null)
         JobRepository.create("Title2", "100000", 1, "<p>Hello</p>", null, null)
         JobRepository.create("Title", "300000", 1, "<p>Hello</p>", null, null)
-        var pattern = Jobs(null, "Title", null, null, null, null, null, null)
+        var pattern = Jobs(null, "Title", null, null, null, null, null, null, null)
         var resultSet = JobRepository.read(pattern)
         val results = DB.getResults(resultSet, Jobs::class)
         assert(results.size == 2)
@@ -95,7 +95,7 @@ class JobRepositoryTest {
         JobRepository.create("Title1", "100000", 1, "<p>Hello</p>", null, null)
         JobRepository.create("Title2", "100000", 1, "<p>Hello</p>", null, null)
         JobRepository.create("Title", "300000", 1, "<p>Hello</p>", null, null)
-        var pattern = Jobs(null, "Title", null, null, null, null, null, null)
+        var pattern = Jobs(null, "Title", null, null, null, null, null, null, null)
         db.connection().prepareStatement("delete from users where id = 1").execute();
         var resultSet = JobRepository.read(pattern)
         var result = DB.getResults(resultSet, Jobs::class)
