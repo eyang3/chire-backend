@@ -84,12 +84,11 @@ object DB {
         statement.setInt(current++, limit.toInt())
         statement.setInt(current++, offset.toInt())
 
-        println(statement)
+
         val resultSet = statement.executeQuery();
         conn.close()
         return resultSet;
     }
-
     fun <T : Any> countRows(table: String, entityClass: KClass<T>, obj: T,
                             subset: String = "", distinct: Boolean = false,
                             freeText: String = "", indexFields: String = ""): ResultSet {

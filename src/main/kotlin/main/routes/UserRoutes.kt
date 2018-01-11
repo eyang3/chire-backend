@@ -86,21 +86,13 @@ fun userRoutes() {
         val redirectToken = Jwts.parser().setSigningKey("HelloWorld").parse(request.token)
         var claims = redirectToken.body as Map<String, Any>;
         var user: User = readJWT(jwt)!!
-        if (user == null) {
-            return@post (RESTStatusMessage("success", "redirect", "not logged in"));
-        } else if (user.roles!![0] == 3 && claims["action"] as String != "apply") {
-            return@post (RESTStatusMessage("success", "redirect", "invalid"));
-        } else if (user.roles!![0] == 2 && claims["action"] as String == "apply") {
-            return@post (RESTStatusMessage("success", "redirect", "invalid"));
-        }
-        println(claims);
-        if (user.roles!![0] == 3) {
-            ApplicationRepository.create(claims["jobRef"] as Int, user.id!!, claims["hrRef"] as Int, "", "")
-            return@post (RESTStatusMessage("success", "redirect", gson.toJson(claims)));
+        for(role in user.roles!!) {
+            if(role == 3 && claims["action"] as String == "apply") {
+                ApplicationRepository.create(claims["jobRef"] as Int, user.id!!, claims["hrRef"] as Int, "", "")
+                return@post (RESTStatusMessage("success", "redirect", gson.toJson(claims)));
+            }
         }
         return@post (RESTStatusMessage("success", "redirect", "do nothing"));
-
-
     }, { gson.toJson(it) })
     post("/ar/update", { req, res ->
         val jwt = req.cookie("auth")
