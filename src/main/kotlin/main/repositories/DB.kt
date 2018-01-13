@@ -1,10 +1,7 @@
 package main.repositories
 
 import org.postgresql.ds.PGConnectionPoolDataSource
-import org.postgresql.ds.PGPooledConnection
-import org.postgresql.ds.PGPoolingDataSource
 import java.sql.*
-import javax.sql.ConnectionPoolDataSource
 import kotlin.reflect.KClass
 import kotlin.reflect.KMutableProperty
 import kotlin.reflect.full.createInstance
@@ -31,7 +28,7 @@ object DB {
     }
 
     fun <T : Any> crudRead(table: String, entityClass: KClass<T>, obj: T,
-                           limit: String = "100", offset: String = "0", sortBy: String = "",
+                           limit: Int = 100, offset: Int = 0, sortBy: String = "",
                            subset: String = "", distinct: Boolean = false,
                            freeText:
                            String = "", indexFields: String = "", dir: String = "ASC"): ResultSet {
@@ -56,18 +53,11 @@ object DB {
             }
         }.filter { it -> it != null }
         var sets = fields.map { it -> "$it = ?" }.joinToString(" AND ")
-        if (freeText != "") {
-            sets = sets + " AND $indexFields @@ phraseto_tsquery(?) ";
-        }
-        var _subset = subset
-        if (subset == "") {
-            _subset = "*"
-        }
+        val triple = subsetSort(freeText, sets, indexFields, subset, sortBy, dir)
+        var _subset = triple.first
+        var _sortBy = triple.second
+        sets = triple.third
         var query = "SELECT $_subset FROM $table"
-        var _sortBy = ""
-        if (sortBy != "") {
-            _sortBy = " ORDER BY $sortBy $dir "
-        }
         if (fields.size > 0) {
             query = "SELECT $_subset FROM $table where $sets $_sortBy LIMIT ? OFFSET ? "
         }
@@ -81,14 +71,32 @@ object DB {
         if (freeText != "") {
             statement.setString(current++, freeText);
         }
-        statement.setInt(current++, limit.toInt())
-        statement.setInt(current++, offset.toInt())
+        statement.setInt(current++, limit)
+        statement.setInt(current++, offset)
 
 
         val resultSet = statement.executeQuery();
         conn.close()
         return resultSet;
     }
+
+    fun subsetSort(freeText: String, sets: String, indexFields: String, subset: String, sortBy: String, dir: String): Triple<String, String, String> {
+        var sets1 = sets
+        if (freeText != "") {
+            sets1 = sets1 + " AND $indexFields @@ phraseto_tsquery(?) ";
+        }
+        var _subset = subset
+        if (subset == "") {
+            _subset = "*"
+        }
+
+        var _sortBy = ""
+        if (sortBy != "") {
+            _sortBy = " ORDER BY $sortBy $dir "
+        }
+        return Triple(_subset, _sortBy, sets1)
+    }
+
     fun <T : Any> countRows(table: String, entityClass: KClass<T>, obj: T,
                             subset: String = "", distinct: Boolean = false,
                             freeText: String = "", indexFields: String = ""): ResultSet {
@@ -137,15 +145,17 @@ object DB {
         conn.close()
         return resultSet;
     }
+
     fun bulkDelete(table: String, ids: List<Int>) {
         val conn = this.connection()
-        val IdFields = ids.map{ id -> "?"}.joinToString(",");
+        val IdFields = ids.map { id -> "?" }.joinToString(",");
         var statement = conn.prepareStatement("DELETE FROM $table where id in ($IdFields)");
         ids.forEachIndexed { index, i -> statement.setInt(index + 1, ids[index]) }
         statement.execute()
         conn.close()
 
     }
+
     fun crudDelete(table: String, id: Int) {
         val conn = this.connection()
         var statement = conn.prepareStatement("DELETE FROM $table where id = ?");

@@ -17,44 +17,16 @@ fun ContactRoutes() {
     get("/ar/ListMyContacts", { req, res ->
         val jwt = req.cookie("auth")
         try {
-            var pageSize = req.queryParams("pageSize")?.toInt();
-            var page = req.queryParams("page")?.toInt();
-            var textQuery: String? = req.queryParams("freeText");
-            var sortBy: String? = req.queryParams("sortBy");
-            if (sortBy == null) {
-                sortBy = ""
-            }
-            if ("email,name,label".indexOf(sortBy) == -1) {
-                println("error");
-                sortBy = ""
-            }
-
-            var dir: String? = req.queryParams("dir");
-
-            if (dir != "ASC" && dir != "DESC") {
-                dir = ""
-            }
-
-            if (textQuery == null) {
-                textQuery = "";
-            }
-            if (pageSize == null) {
-                pageSize = 100;
-            }
-            if (page == null) {
-                page = 1;
-            }
-            var limit = pageSize.toString()
-            var offset = ((page - 1) * pageSize).toString()
-
+            var subset = "email,name,label"
+            var pagingParams = extractPagingParams(req, subset)
             var user: User = readJWT(jwt)!!;
             var pattern = Contact(null, user.id, null, null, null, null);
-
             var resultSet = ContactRepository.read(pattern, subset = "id,email,name,label",
-                    limit = limit, offset = offset, freeText = textQuery, sortBy = sortBy, dir = dir)
+                    limit = pagingParams.limit, offset = pagingParams.offset, freeText = pagingParams.textQuery,
+                    sortBy = pagingParams.sortBy, dir = pagingParams.dir)
             val results = DB.getResults(resultSet, Contact::class, subset = "id,email,name,label")
             val resultCount = ContactRepository.totalRecords(pattern, subset = "id,email,name,label",
-                    freeText = textQuery)
+                    freeText = pagingParams.textQuery)
             val retVal = Results<Contact>(pages = results, totalRecords = resultCount)
             return@get (retVal)
 

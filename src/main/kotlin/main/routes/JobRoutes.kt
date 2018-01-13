@@ -54,45 +54,19 @@ fun JobRoutes() {
     get("/ar/ListMyJobs", { req, res ->
         val jwt = req.cookie("auth")
         try {
-            var pageSize = req.queryParams("pageSize")?.toInt();
-            var page = req.queryParams("page")?.toInt();
-            var textQuery: String? = req.queryParams("freeText");
-            var sortBy: String? = req.queryParams("sortBy");
-            if (sortBy == null) {
-                sortBy = ""
-            }
-            if ("title,category,keywords,last_modified".indexOf(sortBy) == -1) {
-                println("error");
-                sortBy = ""
-            }
-
-            var dir: String? = req.queryParams("dir");
-
-            if (dir != "ASC" && dir != "DESC") {
-                dir = ""
-            }
-
-            if (textQuery == null) {
-                textQuery = "";
-            }
-            if (pageSize == null) {
-                pageSize = 100;
-            }
-            if (page == null) {
-                page = 1;
-            }
-            var limit = pageSize.toString()
-            var offset = ((page - 1) * pageSize).toString()
+            var subset = "jobs.id,title,category,keywords,applications.last_modified";
+            var pagingParams = extractPagingParams(req, subset)
 
             var user: User = readJWT(jwt)!!;
             var pattern = Jobs(null, null, null, user.id,
                     null, null, null, null, null);
 
             var resultSet = JobRepository.read(pattern, subset = "id,title,category,keywords,last_modified",
-                    limit = limit, offset = offset, freeText = textQuery, sortBy = sortBy, dir = dir)
+                    limit = pagingParams.limit, offset = pagingParams.offset, freeText = pagingParams.textQuery,
+                    sortBy = pagingParams.sortBy, dir = pagingParams.dir)
             val results = DB.getResults(resultSet, Jobs::class, subset = "id,title,category,keywords,last_modified")
             val resultCount = JobRepository.totalRecords(pattern, subset = "id,title,category,keywords,last_modified",
-                    freeText = textQuery)
+                    freeText = pagingParams.textQuery)
             val retVal = JobResult(pages = results, totalRecords = resultCount)
             return@get (retVal)
         } catch (e: Exception) {

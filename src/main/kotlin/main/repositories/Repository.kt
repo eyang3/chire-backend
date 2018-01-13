@@ -9,8 +9,8 @@ open class Repository {
 
     init {
     }
-    inline fun <reified T: Any>read(pattern: T, subset: String = "", limit: String = "100",
-             offset: String = "0", freeText: String = "", dir: String="ASC", sortBy: String = ""): ResultSet {
+    inline fun <reified T: Any>read(pattern: T, subset: String = "", limit: Int  =100,
+             offset: Int = 0, freeText: String = "", dir: String="ASC", sortBy: String = ""): ResultSet {
         return DB.crudRead(this.table, T::class, pattern, subset = subset, limit = limit, offset = offset,
                 indexFields = "tsv", freeText = freeText, dir=dir, sortBy = sortBy)
     }

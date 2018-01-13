@@ -36,8 +36,8 @@ object JobRepository {
         return (id);
     }
 
-    fun read(pattern: Jobs, subset: String = "", limit: String = "100",
-             offset: String = "0", freeText: String = "", dir: String = "ASC", sortBy: String = ""): ResultSet {
+    fun read(pattern: Jobs, subset: String = "", limit: Int = 100,
+             offset: Int = 0, freeText: String = "", dir: String = "ASC", sortBy: String = ""): ResultSet {
         return DB.crudRead("jobs", Jobs::class, pattern, subset = subset, limit = limit, offset = offset,
                 indexFields = "tsv", freeText = freeText, dir = dir, sortBy = sortBy)
     }
@@ -55,21 +55,14 @@ object JobRepository {
         DB.crudSave("jobs", Jobs::class, job, id)
     }
 
-    fun jobsFromApplication(applicantRef: Int, subset: String = "", limit: String = "100",
-                            offset: String = "0", freeText: String = "", dir: String = "ASC", sortBy: String = ""): ResultSet {
+    fun jobsFromApplication(applicantRef: Int, subset: String = "", limit: Int = 100,
+                            offset: Int = 0, freeText: String = "", dir: String = "ASC", sortBy: String = ""): ResultSet {
         var connection = DB.connection()
         var sets = ""
-        if (freeText != "") {
-            sets += " AND tsv @@ phraseto_tsquery(?) ";
-        }
-        var _subset = subset
-        if (subset == "") {
-            _subset = "*"
-        }
-        var _sortBy = ""
-        if (sortBy != "") {
-            _sortBy = " ORDER BY $sortBy $dir "
-        }
+        val triple = DB.subsetSort(freeText, sets, "tsv", subset, sortBy, dir)
+        var _subset = triple.first
+        var _sortBy = triple.second
+        sets = triple.third
         var query = """SELECT $_subset FROM jobs join applications on applications.jobref = jobs.id
                        where applicantref = ? $sets $_sortBy LIMIT ? OFFSET ? """
         var statement = connection.prepareStatement(query);
@@ -79,8 +72,8 @@ object JobRepository {
             statement.setString(count++, freeText)
         }
 
-        statement.setInt(count++, limit.toInt())
-        statement.setInt(count++, offset.toInt())
+        statement.setInt(count++, limit)
+        statement.setInt(count++, offset)
         println(statement);
         val resultSet = statement.executeQuery();
         connection.close()
@@ -90,9 +83,8 @@ object JobRepository {
     fun countJobsFromApplication(applicantRef: Int, freeText: String = ""): Int {
         var connection = DB.connection()
         var sets = ""
-        if (freeText != "") {
-            sets += " AND tsv @@ phraseto_tsquery(?) ";
-        }
+        val triple = DB.subsetSort(freeText, sets, "tsv", "", "", "")
+        sets = triple.third
         var query = """SELECT count(*) FROM jobs join applications on applications.jobref = jobs.id
                        where applicantref = ? $sets """
         var statement = connection.prepareStatement(query);
