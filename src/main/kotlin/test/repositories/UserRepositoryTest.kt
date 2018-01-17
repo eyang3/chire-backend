@@ -5,7 +5,7 @@ import main.repositories.UserRepository
 import org.junit.Assert.*
 
 class UserRepositoryTest {
-    val db = DB
+   /* val db = DB
     @org.junit.Before
     fun setUp() {
         db.connect("jdbc:postgresql://127.0.0.1/chire", "postgres", System.getenv("PG_PASS"))
@@ -50,6 +50,6 @@ class UserRepositoryTest {
 
     @org.junit.Test
     fun resetPassword() {
-    }
+    }*/
 
 }

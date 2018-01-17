@@ -18,7 +18,6 @@ object ApplicationRepository: Repository() {
 
     }
     fun create(jobRef: Int, applicantRef: Int, hrRef: Int, resumePath: String, coverletterPath: String) {
-        println("Creating");
         try {
             var application = Applications(null, jobRef, applicantRef, hrRef, resumePath, coverletterPath, null);
             DB.crudSave("applications", Applications::class, application, null)
@@ -27,7 +26,6 @@ object ApplicationRepository: Repository() {
         }
 
     }
-
     fun update(id: Int, jobRef: Int, applicantRef: Int, hrRef: Int,
                resumePath: String, coverletterPath: String, date: Date?) {
         var application = Applications(id, jobRef, applicantRef, hrRef, resumePath, coverletterPath, date);

@@ -5,40 +5,47 @@ import main.repositories.JobRepository
 import main.repositories.Jobs
 import main.repositories.User
 import spark.Spark
-import java.io.*;
-import java.nio.file.*;
+import java.io.File
+import java.nio.charset.Charset
+import java.nio.file.Files
 import java.nio.file.StandardCopyOption
 import javax.servlet.MultipartConfigElement
-import java.nio.file.Path
-import java.io.File
-
-
-
 
 
 fun ApplicantRoutes() {
-    Spark.post("/ar/testFile", {req, res ->
+    Spark.put("/ar/apply/:id", { req, res ->
 
-        val uploadDir = File("/tmp")
-        println(uploadDir)
+    })
+    Spark.post("/ar/testFile", { req, res ->
+        val uploadDir = File("~/files")
         uploadDir.mkdir()
-        var tempFile = Files.createTempFile(uploadDir.toPath(), "", "")
-
         req.attribute("org.eclipse.jetty.multipartConfig", MultipartConfigElement("/tmp"))
-        req.raw().getPart("resume").inputStream.use { // getPart needs to use same "name" as input field in form
-            input ->
-            println(input);
-            Files.copy(input, tempFile, StandardCopyOption.REPLACE_EXISTING)
+        try {
+            val gender = req.raw().getPart("gender").inputStream.use { input ->
+                var gender = input.readBytes().toString(Charset.defaultCharset())
+                return@use (gender);
+            }
+            val race = req.raw().getPart("race").inputStream.use { input ->
+                var race = input.readBytes().toString(Charset.defaultCharset())
+                return@use (race);
+            }
+            println(race)
+            println(gender);
+        } catch (e: Exception) {
+            println(e)
         }
 
-        req.raw().getPart("cover").inputStream.use { // getPart needs to use same "name" as input field in form
-            input ->
-            println(input)
+        var tempFile = Files.createTempFile(uploadDir.toPath(), "", "")
+
+        req.raw().getPart("resume").inputStream.use { input ->
+            Files.copy(input, tempFile, StandardCopyOption.REPLACE_EXISTING)
+        }
+        req.raw().getPart("cover").inputStream.use { input ->
             tempFile = Files.createTempFile(uploadDir.toPath(), "", "")
             Files.copy(input, tempFile, StandardCopyOption.REPLACE_EXISTING)
         }
-        return@post(null);
-    },  { gson.toJson(it) })
+        return@post (null);
+    }, { gson.toJson(it) })
     Spark.get("/ar/ListMyApplications", { req, res ->
         val jwt = req.cookie("auth")
         try {

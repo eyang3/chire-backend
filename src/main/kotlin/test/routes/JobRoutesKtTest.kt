@@ -62,7 +62,7 @@ fun MakeRequest(type: String, endpoint: String, payload: String?, auth: String?)
 
 class JobRoutesKtTest {
 
-    @Before
+ /*   @Before
     fun setUp() {
 
 
@@ -114,7 +114,7 @@ class JobRoutesKtTest {
 
 
 
-    }
+    }*/
 
 
 }

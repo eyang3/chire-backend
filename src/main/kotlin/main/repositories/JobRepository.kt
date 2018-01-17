@@ -4,6 +4,7 @@ import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.SignatureAlgorithm
 import java.sql.Date
 import java.sql.ResultSet
+import repositories.Repository
 
 data class Jobs(var id: Int?, var title: String?, var salary: String?,
                 var userref: Int?, var body: String?, var keywords: String?,
@@ -23,11 +24,11 @@ fun encryptRouteInstruction(id: Int, user: Int, action: String): String {
     return (token)
 }
 
-object JobRepository {
+object JobRepository: Repository() {
     init {
 
     }
-
+    override val table: String = "jobs"
     fun create(title: String, salary: String?, userRef: Int, body: String?, keywords: String?, category: String?): Int {
         var job = Jobs(null, title, salary, userRef, body, keywords, category, null, null)
         var id = DB.crudSave("jobs", Jobs::class, job, null)
@@ -42,12 +43,6 @@ object JobRepository {
                 indexFields = "tsv", freeText = freeText, dir = dir, sortBy = sortBy)
     }
 
-    fun totalRecords(pattern: Jobs, subset: String = "", freeText: String = ""): Int {
-        var resultSet = DB.countRows("jobs", Jobs::class, pattern,
-                subset = "", freeText = freeText, indexFields = "tsv");
-        resultSet.next();
-        return (resultSet.getInt(1))
-    }
 
     fun update(id: Int, title: String?, salary: String?, userRef: Int?, body: String?,
                keywords: String?, category: String?) {
@@ -71,10 +66,8 @@ object JobRepository {
         if (sets != "") {
             statement.setString(count++, freeText)
         }
-
         statement.setInt(count++, limit)
         statement.setInt(count++, offset)
-        println(statement);
         val resultSet = statement.executeQuery();
         connection.close()
         return resultSet;
@@ -98,12 +91,5 @@ object JobRepository {
         return resultSet.getInt(1)
     }
 
-    fun delete(id: Int) {
-        DB.crudDelete("jobs", id)
-    }
-
-    fun bulkDelete(ids: List<Int>) {
-        DB.bulkDelete("jobs", ids)
-    }
 
 }
