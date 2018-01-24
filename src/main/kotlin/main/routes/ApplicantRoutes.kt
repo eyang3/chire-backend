@@ -29,8 +29,7 @@ fun ApplicantRoutes() {
                 var race = input.readBytes().toString(Charset.defaultCharset())
                 return@use (race);
             }
-            println(race)
-            println(gender);
+
         } catch (e: Exception) {
             println(e)
         }
