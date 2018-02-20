@@ -8,6 +8,7 @@ import spark.Spark
 import java.io.File
 import java.nio.charset.Charset
 import java.nio.file.Files
+import java.nio.file.Path
 import java.nio.file.StandardCopyOption
 import javax.servlet.MultipartConfigElement
 
@@ -17,7 +18,7 @@ fun ApplicantRoutes() {
 
     })
     Spark.post("/ar/testFile", { req, res ->
-        val uploadDir = File("~/files")
+        val uploadDir = File("/home/eyang/files")
         uploadDir.mkdir()
         req.attribute("org.eclipse.jetty.multipartConfig", MultipartConfigElement("/tmp"))
         try {
@@ -29,21 +30,28 @@ fun ApplicantRoutes() {
                 var race = input.readBytes().toString(Charset.defaultCharset())
                 return@use (race);
             }
+            val resumeFile: Path? = req.raw().getPart("resume").inputStream.use { input ->
+                val tempFile = Files.createTempFile(uploadDir.toPath(), "", "")
+                Files.copy(input, tempFile, StandardCopyOption.REPLACE_EXISTING)
+                return@use(tempFile)
+            }
+            val coverFile: Path? = req.raw().getPart("cover").inputStream.use { input ->
+                val tempFile = Files.createTempFile(uploadDir.toPath(), "", "")
+                Files.copy(input, tempFile, StandardCopyOption.REPLACE_EXISTING)
+                return@use(tempFile)
+            }
 
         } catch (e: Exception) {
             println(e)
         }
+        try {
 
-        var tempFile = Files.createTempFile(uploadDir.toPath(), "", "")
 
-        req.raw().getPart("resume").inputStream.use { input ->
-            Files.copy(input, tempFile, StandardCopyOption.REPLACE_EXISTING)
+        } catch(e: Exception) {
+            println(e);
         }
-        req.raw().getPart("cover").inputStream.use { input ->
-            tempFile = Files.createTempFile(uploadDir.toPath(), "", "")
-            Files.copy(input, tempFile, StandardCopyOption.REPLACE_EXISTING)
-        }
-        return@post (null);
+
+        return@post ("hello");
     }, { gson.toJson(it) })
     Spark.get("/ar/ListMyApplications", { req, res ->
         val jwt = req.cookie("auth")
