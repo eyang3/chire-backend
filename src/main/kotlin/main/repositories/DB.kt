@@ -74,7 +74,7 @@ object DB {
         statement.setInt(current++, limit)
         statement.setInt(current++, offset)
 
-
+        println(statement);
         val resultSet = statement.executeQuery();
         conn.close()
         return resultSet;
