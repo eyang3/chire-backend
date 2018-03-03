@@ -193,6 +193,7 @@ object DB {
             val cols = fields.joinToString(",")
             val question = fields.map { _ -> "?" }.joinToString(",")
             query = "INSERT INTO $table($cols) VALUES ($question) RETURNING id";
+            println(query);
         }
         val conn = this.connection()
         var statement = conn.prepareStatement(query);
@@ -218,6 +219,7 @@ object DB {
                 "kotlin.ByteArray?" -> statement.setBytes(fieldCount + 1, members[i].getter.call(obj) as ByteArray)
                 "kotlin.Double?" -> statement.setDouble(fieldCount + 1, members[i].getter.call(obj) as Double)
                 "kotlin.Float?" -> statement.setFloat(fieldCount + 1, members[i].getter.call(obj) as Float)
+                "kotlin.Boolean?" -> statement.setBoolean(fieldCount + 1, members[i].getter.call(obj) as Boolean)
                 "kotlin.Long?" -> statement.setLong(fieldCount + 1, members[i].getter.call(obj) as Long)
                 "kotlin.String?" -> statement.setString(fieldCount + 1, members[i].getter.call(obj) as String)
                 "kotlin.collections.MutableList<kotlin.Int>?" -> {

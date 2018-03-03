@@ -26,6 +26,9 @@ object UserRepository {
     init {
 
     }
+    fun existingUser(email: String) {
+
+    }
     fun update(id: Int, email: String, password: String, role: Int) {
         var u = User(id, email, password, null, listOf<Int>(role), null)
         val conn = DB.connection()
@@ -44,6 +47,13 @@ object UserRepository {
         statement.executeUpdate()
         conn.close()
 
+    }
+    fun blankUser(email: String) {
+        val conn = DB.connection()
+        var statement = conn.prepareStatement("UPDATE USERS set password = '' where email = ?")
+        statement.setString(1, email)
+        statement.executeUpdate()
+        conn.close()
     }
 
     fun signup(email: String, password: String?, role: Int) {
@@ -85,7 +95,7 @@ object UserRepository {
         return result[0]
     }
 
-    private fun getUser(email: String): List<User> {
+    fun getUser(email: String): List<User> {
         val conn = DB.connection()
         var statement = conn.prepareStatement("SELECT * FROM USERS where email = ?")
         statement.setString(1, email)

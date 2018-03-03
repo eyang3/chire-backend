@@ -1,9 +1,6 @@
 package routes
 
-import main.repositories.Contact
-import main.repositories.ContactRepository
-import main.repositories.DB
-import main.repositories.User
+import main.repositories.*
 import spark.Spark
 import spark.Spark.delete
 import spark.Spark.get
@@ -17,14 +14,15 @@ fun ContactRoutes() {
     get("/ar/ListMyContacts", { req, res ->
         val jwt = req.cookie("auth")
         try {
-            var subset = "email,name,label"
+            var subset = "id, email,name,label,contactref"
             var pagingParams = extractPagingParams(req, subset)
             var user: User = readJWT(jwt)!!;
             var pattern = Contact(null, user.id, null, null, null, null);
-            var resultSet = ContactRepository.read(pattern, subset = "id,email,name,label",
+            println(pagingParams);
+            var resultSet = ContactRepository.read(pattern, subset = subset,
                     limit = pagingParams.limit, offset = pagingParams.offset, freeText = pagingParams.textQuery,
                     sortBy = pagingParams.sortBy, dir = pagingParams.dir)
-            val results = DB.getResults(resultSet, Contact::class, subset = "id,email,name,label")
+            val results = DB.getResults(resultSet, Contact::class, subset = subset)
             val resultCount = ContactRepository.totalRecords(pattern, subset = "id,email,name,label",
                     freeText = pagingParams.textQuery)
             val retVal = Results<Contact>(pages = results, totalRecords = resultCount)
@@ -56,14 +54,21 @@ fun ContactRoutes() {
         }
         return@delete (RESTStatusMessage("success", "jobs", ""))
     })
+
     Spark.put("/ar/contact", { req, res ->
         val jwt = req.cookie("auth")
         var user: User = readJWT(jwt)!!;
-        println(req.body());
         var request: Contact = gson.fromJson(req.body(), Contact::class.java)
         try {
             var request: Contact = gson.fromJson(req.body(), Contact::class.java)
-            var resultSet = ContactRepository.create(userRef = user.id!!, email = request.email!!, name = request.name, label=request.label)
+            try {
+                UserRepository.signup(request.email!!, "", 2)
+                UserRepository.blankUser(request.email!!)
+            } catch (e: Exception) {
+            }
+            var existingUser = UserRepository.getUser(request.email!!);
+            var resultSet = ContactRepository.create(userRef = user.id!!, email = request.email!!, name = request.name,
+                    label = request.label, contactref = existingUser[0].id)
             return@put (RESTStatusMessage("success", "contacts", "{\"id\": $resultSet}"))
         } catch (e: Exception) {
             println(request);

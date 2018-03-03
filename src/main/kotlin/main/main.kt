@@ -14,6 +14,7 @@ fun main(args: Array<String>) {
     JobRoutes()
     ContactRoutes()
     ApplicantRoutes()
+    EvalRequestRoutes()
     //allow routes to match with trailing slash
     before("/ar/*", { req, res ->
         val jwt = req.cookie("auth")

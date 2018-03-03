@@ -20,8 +20,8 @@ import java.io.InputStream
 
 
 data class SingleApplication(var title: String?, var body: String?, var eeoc_race:String?, var eeoc_gender:String?,
-                             var resumename: String?, var covername: String?) {
-    constructor() : this(null, null, null, null, null, null)
+                             var resumename: String?, var covername: String?, var coverletterpath: String?, var resumepath: String?) {
+    constructor() : this(null, null, null, null, null, null, null, null)
 }
 
 
@@ -52,8 +52,6 @@ fun ApplicantRoutes() {
             val jwt = req.cookie("auth")
             var user: User = readJWT(jwt)!!;
             var id: String = req.params("id")
-            println(race)
-            println(gender)
             var applicationResultSet = ApplicationRepository.read(Applications(null, id.toInt(), user.id, null, null,
                     null, null, null, null, null, null, null, null))
             var applicationResult = DB.getResults(applicationResultSet, Applications::class);

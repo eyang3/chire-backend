@@ -13,8 +13,8 @@ object ContactRepository : Repository() {
 
     }
 
-    fun create(userRef: Int, email: String, name: String?, label: String?): Int {
-        val contact = Contact(userref = userRef, contactref = null, email = email, name = name, label = label, id = null)
+    fun create(userRef: Int, email: String, name: String?, label: String?, contactref: Int?): Int {
+        val contact = Contact(userref = userRef, contactref = contactref, email = email, name = name, label = label, id = null)
         return (DB.crudSave(this.table, Contact::class, contact, null));
     }
 

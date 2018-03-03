@@ -32,7 +32,7 @@ object ApplicationRepository: Repository() {
     fun getApplicationPageInfo(jobRef: Int, applicantRef: Int): ResultSet {
         var connection = DB.connection()
 
-        var query = """SELECT title, body, resumename, covername, eeoc_gender, eeoc_race
+        var query = """SELECT title, body, resumename, resumepath, covername, coverletterpath, eeoc_gender, eeoc_race
                        FROM applications join jobs on applications.jobref = jobs.id
                        where applicantref = ? and applications.jobref = ?"""
         var statement = connection.prepareStatement(query);
