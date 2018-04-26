@@ -6,6 +6,15 @@ import org.apache.poi.xwpf.usermodel.XWPFDocument
 import repositories.EvalRequest
 import repositories.EvalRequestRepository
 import spark.Spark
+import java.sql.Date
+
+
+data class Applications(var id: Int?, var jobref: Int?, var applicantref: Int?,
+                        var hrref: Int?, var resumepath: String?, var coverletterpath: String?,
+                        var interview: Date?, var offer: Boolean?, var rejection_reason: String?, var
+                        eeoc_race: String?, var eeoc_gender: String?, var covername: String?, var resumename: String?) {
+    constructor() : this(null, null, null, null, null, null, null, null, null, null, null, null, null)
+}
 
 
 fun EvalRequestRoutes() {
@@ -29,7 +38,6 @@ fun EvalRequestRoutes() {
         var pattern = EvalRequest(null, null, jobRef, null);
         var resultSet = EvalRequestRepository.read(pattern)
         val results = DB.getResults(resultSet, EvalRequest::class)
-        println(results);
         return@get (results)
     }, { gson.toJson(it) })
 

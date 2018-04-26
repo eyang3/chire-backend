@@ -43,6 +43,30 @@ object ApplicationRepository: Repository() {
         connection.close()
         return resultSet
     }
+    fun nextApplication(jobRef: Int, evaluatorRef: Int) : ResultSet {
+
+            var connection = DB.connection()
+
+            var query = """select title, body, salary, resumepath, coverletterpath, num from
+                        (SELECT title, body, resumepath, coverletterpath, count(evaluations.id) as num
+                            FROM applications
+                            join jobs on applications.jobref = jobs.id
+                            join evalrequest on evalrequest.jobref = applications.jobref
+                            left join evaluations on evaluations.applicationref = jobs.id
+                            where evalrequest.jobref = ? and evalrequest.evaluatorref = ?
+                            group by title, body, resumepath, coverletterpath) a order by num limit 1"""
+            var statement = connection.prepareStatement(query);
+            var count = 1
+            statement.setInt(count++, jobRef)
+            statement.setInt(count++, evaluatorRef)
+            val resultSet = statement.executeQuery();
+            connection.close()
+            return resultSet
+
+
+
+    }
+
     fun update(id: Int, jobRef: Int?, applicantRef: Int?, hrRef: Int?,
                resumePath: String?, coverletterPath: String?, date: Date?,
                offer: Boolean?, rejectReason: String?, eeoc_race: String?, eeoc_gender: String?,
