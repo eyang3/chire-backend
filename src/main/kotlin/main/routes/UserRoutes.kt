@@ -10,12 +10,14 @@ import main.repositories.UserRepository
 import spark.Spark.get
 import spark.Spark.post
 
+val gson = Gson()
+
 data class loginRequest(@SerializedName("username") val username: String?,
                         @SerializedName("password") val password: String?,
                         @SerializedName("role") var role: Int?,
                         @SerializedName("token") var token: String?)
 
-val gson = Gson()
+
 
 fun generateJWT(user: User): String {
 
@@ -46,6 +48,7 @@ fun readJWT(token: String?): User? {
 
 
 fun userRoutes() {
+
     val userrepo = UserRepository
     post("/login", { req, res ->
         try {

@@ -9,8 +9,8 @@ buildscript {
 }
 plugins {
         id 'java'
+        id "org.jetbrains.kotlin.jvm" version "1.2.41"
         id 'com.github.johnrengelman.shadow' version '1.2.3'
-	id 'org.jetbrains.kotlin.jvm' version '1.1.1'
 }
 
 sourceCompatibility = 1.8
@@ -37,6 +37,7 @@ dependencies {
     compile "org.apache.poi:poi-ooxml:3.9"
     compile "fr.opensagres.xdocreport:org.apache.poi.xwpf.converter.core:1.0.6"
     compile "fr.opensagres.xdocreport:org.apache.poi.xwpf.converter.pdf:1.0.6"
+    compile "javax.xml.bind:jaxb-api:2.2.4"
 }
 
 
@@ -57,6 +58,8 @@ sourceSets {
         }
     }
 }
+
+
 
 shadowJar {
     baseName = 'app'
